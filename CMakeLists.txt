@@ -29,14 +29,14 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        httprequestworker.cpp
-        httprequestworker.h
-        jsontablemodel.cpp
-        jsontablemodel.h
+        frontend/main.cpp
+        frontend/mainwindow.cpp
+        frontend/mainwindow.h
+        frontend/mainwindow.ui
+        frontend/httprequestworker.cpp
+        frontend/httprequestworker.h
+        frontend/jsontablemodel.cpp
+        frontend/jsontablemodel.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

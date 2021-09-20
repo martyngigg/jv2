@@ -1,0 +1,39 @@
+trigger:
+  branches:
+    include:
+    - master
+    - refs/tags/*
+  paths:
+    exclude:
+    - README.md
+    
+stages:
+  - stage: 'build'
+    displayName: 'Build'
+    jobs:
+      - job: 'windows'
+        displayName: 'Windows'
+        pool:
+          vmImage: 'windows-latest' 
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - template: templates/windows.yml
+      
+      - job: 'linux'
+        displayName: 'Linux'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - template: templates/linux.yml
+      
+      - job: 'osx'
+        displayName: 'OSX'
+        pool:
+          vmImage: 'macos-latest'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - template: templates/osx.yml

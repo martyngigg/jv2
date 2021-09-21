@@ -37,6 +37,8 @@ void MainWindow::columnHider(int state){
         case Qt::Checked :
           ui->runDataTable->setColumnHidden(i,false);
           break;
+        default :
+          ui->runDataTable->setColumnHidden(i,false);
       }
       break;
     }

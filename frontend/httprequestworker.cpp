@@ -15,8 +15,6 @@ HttpRequestInput::HttpRequestInput(QString v_url_str) { url_str = v_url_str; }
 
 HttpRequestWorker::HttpRequestWorker(QObject *parent)
     : QObject(parent), manager(NULL) {
-  qsrand(QDateTime::currentDateTime().toTime_t());
-
   manager = new QNetworkAccessManager(this);
   connect(manager, SIGNAL(finished(QNetworkReply *)), this,
           SLOT(on_manager_finished(QNetworkReply *)));

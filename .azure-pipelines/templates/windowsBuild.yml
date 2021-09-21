@@ -4,7 +4,7 @@ parameters:
   - name: extraflags
     default: ''
   - name: qtver
-    default: 5.15.1
+    default: 6.1.2
   - name: gui
     default: true
   - name: threading
@@ -19,7 +19,7 @@ steps:
     displayName: 'Install Prerequisites'
   - script: |
       python -m pip install aqtinstall
-      python -m aqt install --outputdir $(Build.BinariesDirectory)\\Qt ${{ parameters.qtver }} windows desktop win64_mingw81 -m qt5core qtgui qtwidgets qtprintsupport
+      python -m aqt install --outputdir $(Build.BinariesDirectory)\\Qt ${{ parameters.qtver }} windows desktop win64_mingw81 -m qt6core qtgui qtwidgets qtprintsupport
     displayName: 'Install Qt'
   - powershell: |
       $ErrorActionPreference = 'Stop'
@@ -31,10 +31,10 @@ steps:
       set -ex
       ls C:/ProgramData/chocolatey/lib/mingw
       HDF5_DIR="$(pwd)/${{ parameters.hdf5tag }}"
-      Qt5_DIR="/d/a/1/b/Qt/5.15.1/mingw81_64"
-      PATH="${PATH}:${Qt5_DIR}"
+      Qt6_DIR="/d/a/1/b/Qt/6.1.2/mingw81_64"
+      PATH="${PATH}:${Qt6_DIR}"
       mkdir build
       cd build
-      cmake ../ -G "MinGW Makefiles" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt5_DIR}/lib/cmake
+      cmake ../ -G "MinGW Makefiles" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}/lib/cmake
       MinGW32-make.exe
     displayName: 'Build'

@@ -24,9 +24,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network REQUIRED)
+set (QT_DEFAULT_MAJOR_VERSION 6)
+find_package(OpenGL REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Network OpenGL OpenGLWidgets REQUIRED)
+find_package(Qt6OpenGL 6.0 REQUIRED)
+find_package(Qt6OpenGLWidgets 6.0 REQUIRED)
 
 set(PROJECT_SOURCES
         frontend/main.cpp
@@ -39,25 +41,19 @@ set(PROJECT_SOURCES
         frontend/jsontablemodel.h
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(backEndTest
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-else()
-    if(ANDROID)
-        add_library(backEndTest SHARED
-            ${PROJECT_SOURCES}
-        )
-    else()
-        add_executable(backEndTest
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+qt_add_executable(backEndTest
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
-target_link_libraries(backEndTest PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(backEndTest PRIVATE Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(
+    backEndTest
+    PRIVATE # External libs
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Network
+            OpenGL::GL
+)
 
 set_target_properties(backEndTest PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

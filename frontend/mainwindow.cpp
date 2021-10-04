@@ -4,15 +4,15 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "jsontablemodel.h"
+#include <QCheckBox>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QSortFilterProxyModel>
-#include <QtGui>
-#include <QCheckBox>
 #include <QWidgetAction>
+#include <QtGui>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -23,22 +23,22 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() { delete ui; }
 
 // Hide column on view menu change
-void MainWindow::columnHider(int state){
-  QCheckBox* action = qobject_cast<QCheckBox*> (sender());
+void MainWindow::columnHider(int state) {
+  QCheckBox *action = qobject_cast<QCheckBox *>(sender());
 
-  for (int i = 0; i<ui->runDataTable->horizontalHeader()->count(); i++)
-  {
-    if (action->text() == ui->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal))
-    {
-      switch(action->checkState()){
-        case Qt::Unchecked :
-          ui->runDataTable->setColumnHidden(i,true);
-          break;
-        case Qt::Checked :
-          ui->runDataTable->setColumnHidden(i,false);
-          break;
-        default :
-          ui->runDataTable->setColumnHidden(i,false);
+  for (int i = 0; i < ui->runDataTable->horizontalHeader()->count(); i++) {
+    if (action->text() ==
+        ui->runDataTable->horizontalHeader()->model()->headerData(
+            i, Qt::Horizontal)) {
+      switch (action->checkState()) {
+      case Qt::Unchecked:
+        ui->runDataTable->setColumnHidden(i, true);
+        break;
+      case Qt::Checked:
+        ui->runDataTable->setColumnHidden(i, false);
+        break;
+      default:
+        ui->runDataTable->setColumnHidden(i, false);
       }
       break;
     }
@@ -133,13 +133,14 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker) {
     foreach (const QString &key, jsonObject.keys()) {
       header.push_back(
           JsonTableModel::Heading({{"title", key}, {"index", key}}));
-      
+
       QCheckBox *checkBox = new QCheckBox(viewMenu);
       QWidgetAction *checkableAction = new QWidgetAction(viewMenu);
       checkableAction->setDefaultWidget(checkBox);
       checkBox->setText(key);
       checkBox->setCheckState(Qt::Checked);
-      connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));
+      connect(checkBox, SIGNAL(stateChanged(int)), this,
+              SLOT(columnHider(int)));
       viewMenu->addAction(checkableAction);
     }
     model = new JsonTableModel(header, this);

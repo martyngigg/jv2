@@ -13,7 +13,7 @@ steps:
       set -ex
       brew update-reset
       brew install ninja
-      brew install qt6
+      brew install qt
     displayName: 'Install Prerequisites'
   - bash: |
       wget https://github.com/disorderedmaterials/HDF5/releases/download/${{ parameters.hdf5tag }}/${{ parameters.hdf5tag }}-osx.zip

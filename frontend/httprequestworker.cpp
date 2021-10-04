@@ -28,7 +28,7 @@ void HttpRequestWorker::execute(HttpRequestInput *input) {
   response = "";
   error_type = QNetworkReply::NoError;
   error_str = "";
-  
+
   // execute connection
   QNetworkRequest request = QNetworkRequest(QUrl(input->url_str));
   request.setRawHeader("User-Agent", "Agent name goes here");

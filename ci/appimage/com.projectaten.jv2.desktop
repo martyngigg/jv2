@@ -1,0 +1,11 @@
+[Desktop Entry]
+Comment=ISIS Journal Viewer
+Exec=jv2 %f
+GenericName=JournalViewer2
+Icon=JournalViewer2
+Name=JournalViewer2
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Science;
+X-SuSE-translate=false

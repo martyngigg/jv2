@@ -29,9 +29,9 @@ private slots:
   void on_filterBox_textChanged(const QString &arg1);
   void handle_result_instruments(HttpRequestWorker *worker);
   void handle_result_cycles(HttpRequestWorker *worker);
-  void on_instrumentsBox_currentIndexChanged(const QString &arg1);
+  void on_instrumentsBox_currentTextChanged(const QString &arg1);
 
-  void on_cyclesBox_currentIndexChanged(const QString &arg1);
+  void on_cyclesBox_currentTextChanged(const QString &arg1);
 
   void columnHider(int state);
 

@@ -1,0 +1,26 @@
+parameters:
+  - name: qtver
+    default: 6.1.2
+    
+steps:
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+      # Set paths
+      $env:Qt6_DIR = "$(Build.BinariesDirectory)\Qt\${{ parameters.qtver }}\mingw81_64"
+      $env:PATH += ";$env:Qt6_DIR" + "\bin"
+      echo $env:Qt6_DIR
+      $env:MINGW_LIB_DIR = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
+      $env:JV2_DIR = $(Get-Location).path + "\build"
+      # Collect artifacts
+      mkdir packages
+      mkdir packages\jv2
+      windeployqt --dir packages\jv2 build\jv2.exe
+      mv build\jv2.exe packages\jv2
+      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libgcc_s_seh-1.dll packages\jv2
+      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libstdc++-6.dll packages\jv2
+      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libwinpthread-1.dll packages\jv2
+      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libquadmath-0.dll packages\jv2
+      mv dist\launch packages
+      mv dist\backend packages
+      Compress-Archive -Path 'packages' -DestinationPath 'packageZip.zip'
+    displayName: 'Create Packages'

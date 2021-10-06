@@ -62,7 +62,7 @@ void MainWindow::fillInstruments() {
   }
 }
 
-void MainWindow::on_instrumentsBox_currentIndexChanged(const QString &arg1) {
+void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1) {
   // Handle possible undesired calls
   if (arg1 == "default" || arg1 == "") {
     ui->cyclesBox->clear();
@@ -78,7 +78,7 @@ void MainWindow::on_instrumentsBox_currentIndexChanged(const QString &arg1) {
   worker->execute(&input);
 }
 
-void MainWindow::on_cyclesBox_currentIndexChanged(const QString &arg1) {
+void MainWindow::on_cyclesBox_currentTextChanged(const QString &arg1) {
   // Handle possible undesired calls
   if (arg1 == "default" || arg1 == "") {
     return;

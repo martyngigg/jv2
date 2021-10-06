@@ -1,0 +1,36 @@
+parameters:
+  - name: qtver
+    default: 6.1.3
+
+steps:
+  - bash: |
+      pip3 install dmgbuild biplist
+      wget https://raw.githubusercontent.com/disorderedmaterials/scripts/master/prep-dmg
+      chmod u+x ./prep-dmg
+    displayName: 'Install Prerequisites'
+  - bash: |
+      set -ex
+      # Set Qt dir - assume that it is somewhere in /usr/local/Cellar
+      QT_INSTALL_DIR=/usr/local/Cellar/qt
+      QTVER=`ls -d ${QT_INSTALL_DIR}/* | sed "s/.*\(6\.[0-9][0-9]\.[0-9]\)/\1/g"`
+      Qt6_ROOT=${QT_INSTALL_DIR}/${QTVER}
+      # Get program version
+      export VERSION=`grep "#define JV2VERSION" version.h | sed "s/.*\"\(.*\)\"/\1/g"`
+      ./prep-dmg -a jv2 -v ${VERSION} -b build/jv2.app/Contents/MacOS/jv2 -d ${QTVER} -i extra/jv2_1024.png -p build/jv2.app/Contents/Info.plist
+    displayName: 'Prepare DMG Dirs'
+  - bash: |
+      set -ex
+       # Get program version
+      export VERSION=`grep "#define JV2VERSION" version.h | sed "s/.*\"\(.*\)\"/\1/g"`
+      # Create DMG
+      macdeployqt build/jv2.app
+    displayName: 'Create Disk Images'
+  - bash: |
+      set -ex
+      mkdir packages
+      mkdir packages/jv2
+      mv dist/launch packages
+      mv dist/backend packages
+      mv build/jv2.app packages/jv2
+      zip jv2.zip packages
+    displayName: 'Move Artifacts'

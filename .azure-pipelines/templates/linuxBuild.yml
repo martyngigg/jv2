@@ -15,11 +15,13 @@ steps:
       set -ex
       # -- General
       sudo apt-get update -q
-      sudo apt-get install antlr4 ninja-build python3-setuptools uuid uuid-dev
+      sudo apt-get install ninja-build python3-setuptools uuid uuid-dev
       sudo apt-get install libgl1-mesa-dev
       # -- Qt
       sudo pip3 install aqtinstall
-      aqt install --outputdir /tmp/qt ${{ parameters.qtver }} linux desktop -m qtcore qtgui qtwidgets qtopengl qtopenglwidgets
+      aqt install-qt --outputdir /tmp/qt linux desktop ${{ parameters.qtver }} -m all
+      # -- Python
+      pip3 install pyinstaller
     displayName: 'Install Prerequisites'
   - bash: |
       wget https://github.com/disorderedmaterials/HDF5/releases/download/${{ parameters.hdf5tag }}/${{ parameters.hdf5tag }}-linux.zip
@@ -37,6 +39,10 @@ steps:
       # Building
       mkdir build
       cd build
-      cmake ../ -G Ninja ${{ parameters.extraflags }} -DLOCAL_STATIC_HDF5:bool=true -DHDF5_DIR:path=${HDF5_DIR}
+      cmake ../ -G Ninja ${{ parameters.extraflags }} -DLOCAL_STATIC_HDF5:bool=true -DHDF5_DIR:path=${HDF5_DIR} -Wl,-rpath,/tmp/qt/6.1.2/gcc_64/lib
       ninja
+
+      cd ../
+      pyinstaller backend/backend.py
+      pyinstaller backend/launch.py
     displayName: 'Build'

@@ -1,12 +1,14 @@
 trigger:
   branches:
     include:
-    - master
+    - develop
     - refs/tags/*
   paths:
     exclude:
+    - .azure-pipelines/release.yml
+    - .azure-pipelines/pr.yml
     - README.md
-    
+
 stages:
   - template: templates/codeQualityChecks.yml
 

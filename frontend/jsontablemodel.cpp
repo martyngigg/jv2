@@ -17,6 +17,18 @@ bool JsonTableModel::setJson(const QJsonArray &array) {
   return true;
 }
 
+QJsonArray JsonTableModel::getJson() { return m_json; }
+
+// Sets header data to define table
+bool JsonTableModel::setHeader(const Header &array) {
+  beginResetModel();
+  m_header = array;
+  endResetModel();
+  return true;
+}
+
+JsonTableModel::Header JsonTableModel::getHeader() { return m_header; }
+
 QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation,
                                     int role) const {
   if (role != Qt::DisplayRole) {
@@ -72,4 +84,55 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const {
   default:
     return QVariant();
   }
+}
+
+// Returns grouped table data
+void JsonTableModel::groupData() {
+  QJsonArray groupedJson;
+  // holds data in tuple as QJson referencing is incomplete
+  std::vector<std::tuple<QString, QString, QString>> groupedData;
+  for (QJsonValue value : m_json) {
+    const QJsonObject &valueObj = value.toObject();
+    bool unique = true;
+    // add duplicate title data to stack
+    for (std::tuple<QString, QString, QString> &data : groupedData) {
+      if (std::get<0>(data) == valueObj["title"].toString()) {
+        int totalRunTime =
+            std::get<1>(data).toInt() + valueObj["duration"].toString().toInt();
+        std::get<1>(data) = QString::number(totalRunTime);
+        std::get<2>(data) += "-" + valueObj["run_number"].toString();
+        unique = false;
+        break;
+      }
+    }
+    if (unique) {
+      groupedData.push_back(std::make_tuple(valueObj["title"].toString(),
+                                            valueObj["duration"].toString(),
+                                            valueObj["run_number"].toString()));
+    }
+  }
+  for (std::tuple<QString, QString, QString> data : groupedData) {
+    auto groupData = QJsonObject(
+        {qMakePair(QString("title"), QJsonValue(std::get<0>(data))),
+         qMakePair(QString("duration"), QJsonValue(std::get<1>(data))),
+         qMakePair(QString("run_number"), QJsonValue(std::get<2>(data)))});
+    groupedJson.push_back(QJsonValue(groupData));
+  }
+  // Hold ungrouped values
+  m_holdJson = m_json;
+  m_holdHeader = m_header;
+
+  // Get and assign array headers
+  Header header;
+  foreach (const QString &key, groupedJson.at(0).toObject().keys()) {
+    header.push_back(Heading({{"title", key}, {"index", key}}));
+  }
+  setHeader(header);
+  setJson(groupedJson);
+}
+
+// Apply held (ungrouped) values to table
+void JsonTableModel::unGroupData() {
+  setHeader(m_holdHeader);
+  setJson(m_holdJson);
 }

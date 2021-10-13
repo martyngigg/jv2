@@ -13,26 +13,39 @@ stages:
   - template: templates/codeQualityChecks.yml
 
   - stage: 'build'
-    displayName: 'Build'
+    displayName: 'Build and Package'
     jobs:
       - job: 'windows'
         displayName: 'Windows'
         pool:
-          vmImage: 'windows-latest' 
+          vmImage: 'windows-latest'
         steps:
           - checkout: self
             fetchDepth: 1
           - template: templates/windowsBuild.yml
-      
+          - template: templates/windowsPackage.yml
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "packages/"
+              ArtifactName: 'windows-artifacts'
+            displayName: 'Publish Windows Artifacts'
+    
       - job: 'linux'
         displayName: 'Linux'
+        condition: eq(1,0)
         pool:
           vmImage: 'ubuntu-latest'
         steps:
           - checkout: self
             fetchDepth: 1
           - template: templates/linuxBuild.yml
-      
+          - template: templates/linuxPackage.yml
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "packages/"
+              ArtifactName: 'linux-artifacts'
+            displayName: 'Publish Linux Artifacts'
+    
       - job: 'osx'
         displayName: 'OSX'
         pool:
@@ -41,3 +54,9 @@ stages:
           - checkout: self
             fetchDepth: 1
           - template: templates/osxBuild.yml
+          - template: templates/osxPackage.yml
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "packages/"
+              ArtifactName: 'osx-artifacts'
+            displayName: 'Publish OSX Artifacts'

@@ -50,6 +50,8 @@ void MainWindow::initialiseElements() {
   viewMenu = ui->menubar->addMenu("View");
   ui->runDataTable->horizontalHeader()->setSectionsMovable(true);
   ui->runDataTable->horizontalHeader()->setDragEnabled(true);
+  ui->runDataTable->setAlternatingRowColors(true);
+  ui->runDataTable->setStyleSheet("alternate-background-color: #e7e7e6;");
 }
 
 // Fill instrument list
@@ -67,6 +69,7 @@ void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1) {
   if (arg1 == "default" || arg1 == "") {
     ui->cyclesBox->clear();
     ui->cyclesBox->addItem("default");
+    ui->filterBox->setEnabled(false);
     return;
   }
   QString url_str = "http://127.0.0.1:5000/getCycles/" + arg1;
@@ -81,8 +84,10 @@ void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1) {
 void MainWindow::on_cyclesBox_currentTextChanged(const QString &arg1) {
   // Handle possible undesired calls
   if (arg1 == "default" || arg1 == "") {
+    ui->filterBox->setEnabled(false);
     return;
   }
+  ui->filterBox->setEnabled(true);
   QString url_str = "http://127.0.0.1:5000/getJournal/" +
                     ui->instrumentsBox->currentText() + "/" + arg1;
   HttpRequestInput input(url_str);
@@ -149,10 +154,17 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker) {
     ui->runDataTable->setModel(proxyModel);
     model->setJson(jsonArray);
     ui->runDataTable->show();
-
   } else {
     // an error occurred
     msg = "Error2: " + worker->error_str;
     QMessageBox::information(this, "", msg);
+  }
+}
+
+void MainWindow::on_groupButton_clicked(bool checked) {
+  if (checked) {
+    model->groupData();
+  } else {
+    model->unGroupData();
   }
 }

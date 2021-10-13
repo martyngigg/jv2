@@ -30,9 +30,8 @@ private slots:
   void handle_result_instruments(HttpRequestWorker *worker);
   void handle_result_cycles(HttpRequestWorker *worker);
   void on_instrumentsBox_currentTextChanged(const QString &arg1);
-
   void on_cyclesBox_currentTextChanged(const QString &arg1);
-
+  void on_groupButton_clicked(bool checked);
   void columnHider(int state);
 
 private:

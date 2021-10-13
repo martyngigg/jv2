@@ -34,6 +34,7 @@ stages:
     
       - job: 'linux'
         displayName: 'Linux'
+        condition: eq(1,0)
         pool:
           vmImage: 'ubuntu-latest'
         steps:

@@ -20,6 +20,9 @@ public:
   JsonTableModel(const Header &header, QObject *parent = 0);
 
   bool setJson(const QJsonArray &array);
+  QJsonArray getJson();
+  bool setHeader(const Header &array);
+  Header getHeader();
 
   virtual QJsonObject getJsonObject(const QModelIndex &index) const;
 
@@ -29,10 +32,14 @@ public:
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
   virtual QVariant data(const QModelIndex &index,
                         int role = Qt::DisplayRole) const;
+  virtual void groupData();
+  virtual void unGroupData();
 
 private:
   Header m_header;
+  Header m_holdHeader;
   QJsonArray m_json;
+  QJsonArray m_holdJson;
 };
 
 #endif // JSONTABLEMODEL_H

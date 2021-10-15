@@ -67,7 +67,10 @@ if(APPLE)
   add_definitions(-D_MAC)
 endif(APPLE)
 
-add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES})
+# Resources
+set(jv2_RES_QRC "frontend/icons.qrc")
+
+add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES} ${jv2_RES_QRC})
 
 target_link_libraries(
   jv2 PRIVATE # External libs

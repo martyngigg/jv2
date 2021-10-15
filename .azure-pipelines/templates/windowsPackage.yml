@@ -21,6 +21,6 @@ steps:
       cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libwinpthread-1.dll packages\jv2
       cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libquadmath-0.dll packages\jv2
       mv dist\launch packages
-      mv dist\backend packages
+      mv dist\isisInternal packages
       Compress-Archive -Path 'packages' -DestinationPath 'packageZip.zip'
     displayName: 'Create Packages'

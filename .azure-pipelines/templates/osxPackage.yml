@@ -30,7 +30,7 @@ steps:
       mkdir packages
       mkdir packages/jv2
       mv dist/launch packages
-      mv dist/backend packages
+      mv dist/isisInternal packages
       mv build/jv2.app packages/jv2
       zip jv2.zip packages
     displayName: 'Move Artifacts'

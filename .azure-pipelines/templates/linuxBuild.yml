@@ -43,6 +43,6 @@ steps:
       ninja
 
       cd ../
-      pyinstaller backend/backend.py
+      pyinstaller backend/isisInternal.py
       pyinstaller backend/launch.py
     displayName: 'Build'

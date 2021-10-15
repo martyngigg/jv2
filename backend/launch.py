@@ -1,4 +1,4 @@
 import subprocess
 
-backend = subprocess.Popen("../backend/backend")
+isisInternal = subprocess.Popen("../isisInternal/isisInternal")
 frontend = subprocess.Popen("../jv2/jv2")

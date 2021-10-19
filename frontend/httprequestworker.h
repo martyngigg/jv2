@@ -14,37 +14,39 @@
 #include <QString>
 
 // Object for request URL
-class HttpRequestInput {
+class HttpRequestInput
+{
 
-public:
-  QString url_str;
+    public:
+    QString url_str;
 
-  HttpRequestInput(QString v_url_str);
+    HttpRequestInput(QString v_url_str);
 };
 
 // Object for handling http request
-class HttpRequestWorker : public QObject {
-  Q_OBJECT
+class HttpRequestWorker : public QObject
+{
+    Q_OBJECT
 
-public:
-  QString response;
-  QNetworkReply::NetworkError error_type;
-  QString error_str;
-  QJsonDocument jsonResponse;
-  QJsonArray json_array;
+    public:
+    QString response;
+    QNetworkReply::NetworkError error_type;
+    QString error_str;
+    QJsonDocument jsonResponse;
+    QJsonArray json_array;
 
-  explicit HttpRequestWorker(QObject *parent = 0);
+    explicit HttpRequestWorker(QObject *parent = 0);
 
-  void execute(HttpRequestInput *input);
+    void execute(HttpRequestInput input);
 
-signals:
-  void on_execution_finished(HttpRequestWorker *worker);
+    signals:
+    void on_execution_finished(HttpRequestWorker *worker);
 
-private:
-  QNetworkAccessManager *manager;
+    private:
+    QNetworkAccessManager *manager_;
 
-private slots:
-  void on_manager_finished(QNetworkReply *reply);
+    private slots:
+    void on_manager_finished(QNetworkReply *reply);
 };
 
 #endif // HTTPREQUESTWORKER_H

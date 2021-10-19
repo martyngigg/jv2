@@ -38,6 +38,9 @@ find_package(Qt6OpenGLWidgets 6.0 REQUIRED)
 set(PROJECT_SOURCES
     frontend/main.cpp
     frontend/mainwindow.cpp
+    frontend/filtering.cpp
+    frontend/datagathering.cpp
+    frontend/searching.cpp
     frontend/mainwindow.h
     frontend/mainwindow.ui
     frontend/httprequestworker.cpp

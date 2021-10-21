@@ -9,6 +9,8 @@ trigger:
     - .azure-pipelines/pr.yml
     - README.md
 
+pr: none
+
 stages:
   - template: templates/codeQualityChecks.yml
 

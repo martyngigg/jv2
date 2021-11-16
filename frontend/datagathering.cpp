@@ -46,6 +46,7 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
     }
     if (init_)
     {
+        // Sets cycle to most recently viewed
         recentCycle();
         init_ = false;
     }

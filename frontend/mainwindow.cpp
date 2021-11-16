@@ -49,13 +49,17 @@ void MainWindow::initialiseElements()
         ui_->instrumentsBox->setCurrentIndex(instrumentIndex);
     else
         ui_->instrumentsBox->setCurrentIndex(ui_->instrumentsBox->count() - 1);
-    // Sets cycle to most recently viewed
-    recentCycle();
 }
 
 // Sets cycle to most recently viewed
 void MainWindow::recentCycle()
 {
+    // Disable selections if api fails
+    if (ui_->cyclesBox->count() == 0)
+    {
+        ui_->instrumentsBox->clear();
+        QWidget::setEnabled(false);
+    }
     QSettings settings;
     QString recentCycle = settings.value("recentCycle").toString();
     auto cycleIndex = ui_->cyclesBox->findText(recentCycle);

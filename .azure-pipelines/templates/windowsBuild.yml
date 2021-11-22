@@ -13,10 +13,11 @@ parameters:
 steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.9.7'
+      versionSpec: '3.9.8'
   - script: |
       python3 -m pip install pyinstaller
       python3 -m pip install flask
+      python3 -m pip install h5py
     displayName: 'Install Prerequisites'
   - script: |
       python3 -m pip install aqtinstall
@@ -40,4 +41,6 @@ steps:
       MinGW32-make.exe
 
       cd ../
+      pyinstaller backend/isisInternal.py 
+      pyinstaller --icon=ci/windows/JournalViewer2.ico backend/launch.py
     displayName: 'Build'

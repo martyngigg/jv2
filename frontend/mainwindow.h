@@ -6,6 +6,7 @@
 
 #include "httprequestworker.h"
 #include "jsontablemodel.h"
+#include <QChart>
 #include <QCheckBox>
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
@@ -33,15 +34,25 @@ class MainWindow : public QMainWindow
     void on_searchBox_textChanged(const QString &arg1);
     void handle_result_instruments(HttpRequestWorker *worker);
     void handle_result_cycles(HttpRequestWorker *worker);
+    void handle_result_fieldQuery(HttpRequestWorker *worker);
+    void handle_result_logData(HttpRequestWorker *worker);
     void on_instrumentsBox_currentTextChanged(const QString &arg1);
     void on_cyclesBox_currentTextChanged(const QString &arg1);
     void on_groupButton_clicked(bool checked);
     void columnHider(int state);
+    void fieldToggled();
+    void runToggled();
     void on_clearSearchButton_clicked();
     void on_findUp_clicked();
     void on_findDown_clicked();
     void on_searchAll_clicked();
     void recentCycle();
+    void on_graph_clicked();
+    void customMenuRequested(QPoint pos);
+    void handle_result_contextGraph(HttpRequestWorker *worker);
+    void contextGraph();
+    void handle_result_contextMenu(HttpRequestWorker *worker);
+    void removeTab(int index);
 
     protected:
     // Window close event
@@ -52,9 +63,14 @@ class MainWindow : public QMainWindow
     JsonTableModel *model_;
     QSortFilterProxyModel *proxyModel_;
     QMenu *viewMenu_;
+    QMenu *nexusMenu_;
+    QMenu *runsMenu_;
+    QMenu *contextMenu_;
     JsonTableModel::Header header_;
     QModelIndexList foundIndices_;
     int currentFoundIndex_;
     bool init_;
+    QChart *chart_;
+    QPoint pos_;
 };
 #endif // MAINWINDOW_H

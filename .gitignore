@@ -3,3 +3,4 @@ build/
 *.pyc
 dist/
 *.spec
+CMakeLists.txt.user

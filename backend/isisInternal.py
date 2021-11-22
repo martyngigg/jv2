@@ -8,6 +8,7 @@ from flask import request
 from urllib.request import urlopen
 from xml.etree.ElementTree import parse
 
+import nexusInteraction
 app = Flask(__name__)
 
 # Shutdown flask server
@@ -19,8 +20,23 @@ def shutdown_server():
         raise RuntimeError('Not running with the Local Server')
     serverShutdownFunction()
 
+# Get nexus file fields
 
-# Get instrument cycle values
+
+@app.route('/getNexusFields/<instrument>/<cycle>/<runs>')
+def getNexusFields(instrument, cycle, runs):
+    runFields = nexusInteraction.runFields(instrument, cycle, runs)
+    return jsonify(runFields)
+
+# Get all log data from nexus field
+
+
+@app.route('/getNexusData/<instrument>/<cycle>/<runs>/<fields>')
+def getNexusData(instrument, cycle, runs, fields):
+    fieldData = nexusInteraction.fieldData(instrument, cycle, runs, fields)
+    return jsonify(fieldData)
+
+# Get instrument cycles
 
 
 @app.route('/getCycles/<instrument>')

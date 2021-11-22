@@ -16,6 +16,10 @@
 #include <QWidgetAction>
 #include <QtGui>
 
+#include <QChart>
+#include <QChartView>
+#include <QLineSeries>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);
@@ -35,6 +39,10 @@ void MainWindow::initialiseElements()
     // View menu for column toggles
     viewMenu_ = ui_->menubar->addMenu("View");
 
+    // Temporary nexus data menu
+    nexusMenu_ = ui_->menubar->addMenu("Nexus");
+    runsMenu_ = ui_->menubar->addMenu("Runs");
+
     // Allows re-arranging of table columns
     ui_->runDataTable->horizontalHeader()->setSectionsMovable(true);
     ui_->runDataTable->horizontalHeader()->setDragEnabled(true);
@@ -49,6 +57,24 @@ void MainWindow::initialiseElements()
         ui_->instrumentsBox->setCurrentIndex(instrumentIndex);
     else
         ui_->instrumentsBox->setCurrentIndex(ui_->instrumentsBox->count() - 1);
+
+    // Creates Chart
+    chart_ = new QChart;
+    ui_->chartView->setChart(chart_);
+
+    // Creates graph toggle
+    ui_->togglePage->addItem(tr("Data table"));
+    ui_->togglePage->addItem(tr("Data graph"));
+    connect(ui_->togglePage, QOverload<int>::of(&QComboBox::activated), ui_->stackedWidget, &QStackedWidget::setCurrentIndex);
+
+    // Disables closing data tab + handles tab closing
+    ui_->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
+    connect(ui_->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(removeTab(int)));
+
+    // Context menu stuff
+    ui_->runDataTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui_->runDataTable, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
+    contextMenu_ = new QMenu("Context");
 }
 
 // Sets cycle to most recently viewed

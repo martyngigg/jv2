@@ -35,6 +35,9 @@ void MainWindow::on_filterBox_textChanged(const QString &arg1)
     proxyModel_->setFilterFixedString(arg1.trimmed());
     proxyModel_->setFilterKeyColumn(-1);
     proxyModel_->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    // Update search to new data
+    on_searchBox_textChanged(ui_->searchBox->text());
 }
 
 // Groups table data

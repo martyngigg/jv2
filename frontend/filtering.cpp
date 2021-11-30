@@ -11,7 +11,7 @@ void MainWindow::columnHider(int state)
 
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
-        if (action->text() == ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal))
+        if (action->text() == ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString())
         {
             switch (state)
             {

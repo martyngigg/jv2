@@ -63,20 +63,11 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
         auto jsonArray = worker->json_array;
         auto jsonObject = jsonArray.at(0).toObject();
         header_.clear();
-        viewMenu_->clear();
         foreach (const QString &key, jsonObject.keys())
         {
             header_.push_back(JsonTableModel::Heading({{"title", key}, {"index", key}}));
-
-            // Fills viewMenu_ with all columns
-            QCheckBox *checkBox = new QCheckBox(viewMenu_);
-            QWidgetAction *checkableAction = new QWidgetAction(viewMenu_);
-            checkableAction->setDefaultWidget(checkBox);
-            checkBox->setText(key);
-            checkBox->setCheckState(Qt::Checked);
-            connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));
-            viewMenu_->addAction(checkableAction);
         }
+
         // Sets and fills table data
         model_ = new JsonTableModel(header_, this);
         proxyModel_ = new QSortFilterProxyModel;
@@ -84,6 +75,26 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
         ui_->runDataTable->setModel(proxyModel_);
         model_->setJson(jsonArray);
         ui_->runDataTable->show();
+
+        // Fills viewMenu_ with all columns
+        viewMenu_->clear();
+        foreach (const QString &key, jsonObject.keys())
+        {
+
+            QCheckBox *checkBox = new QCheckBox(viewMenu_);
+            QWidgetAction *checkableAction = new QWidgetAction(viewMenu_);
+            checkableAction->setDefaultWidget(checkBox);
+            checkBox->setText(key);
+            checkBox->setCheckState(Qt::PartiallyChecked);
+            viewMenu_->addAction(checkableAction);
+            connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));
+
+            // Filter table based on desired headers
+            if (!desiredHeader_.contains(key))
+                checkBox->setCheckState(Qt::Unchecked);
+            else
+                checkBox->setCheckState(Qt::Checked);
+        }
     }
     else
     {
@@ -104,6 +115,16 @@ void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1)
     }
     ui_->instrumentsBox->setDisabled(arg1.isEmpty());
 
+    QString instType = ui_->instrumentsBox->itemData(ui_->instrumentsBox->findText(arg1)).toString();
+    desiredHeader_.clear();
+    if (instType == "neutron")
+    {
+        desiredHeader_ = neutronHeader_;
+    }
+    else
+    {
+        desiredHeader_ = muonHeader_;
+    }
     // Configure api call
     QString url_str = "http://127.0.0.1:5000/getCycles/" + arg1;
     HttpRequestInput input(url_str);

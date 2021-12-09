@@ -4,6 +4,7 @@
 #include "./ui_mainwindow.h"
 #include "mainwindow.h"
 #include <QAction>
+#include <QCategoryAxis>
 #include <QDateTimeAxis>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -369,6 +370,8 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         auto *timeAxis = new QDateTimeAxis();
         timeAxis->setFormat("yyyy-MM-dd<br>H:mm:ss");
         timeAxis->setTitleText("Real Time");
+        auto *stringAxis = new QCategoryAxis();
+        QStringList categoryValues;
         bool firstRun = true;
         // For each Run
         foreach (const auto &runFields, worker->json_array)
@@ -394,11 +397,25 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                 QString name = fieldDataArray.first()[0].toString() + " " + fieldDataArray.first()[1].toString();
                 series->setName(name);
                 fieldDataArray.removeFirst();
-                foreach (const auto &dataPair, fieldDataArray)
+
+                if (fieldDataArray.first()[1].isString())
                 {
-                    auto dataPairArray = dataPair.toArray();
-                    series->append(startTime.addSecs(dataPairArray[0].toDouble()).toSecsSinceEpoch(),
-                                   dataPairArray[1].toDouble());
+                    foreach (const auto &dataPair, fieldDataArray)
+                    {
+                        auto dataPairArray = dataPair.toArray();
+                        categoryValues.append(dataPairArray[1].toString());
+                        series->append(startTime.addSecs(dataPairArray[0].toDouble()).toSecsSinceEpoch(),
+                                       dataPairArray[1].toString().right(2).toDouble());
+                    }
+                }
+                else
+                {
+                    foreach (const auto &dataPair, fieldDataArray)
+                    {
+                        auto dataPairArray = dataPair.toArray();
+                        series->append(startTime.addSecs(dataPairArray[0].toDouble()).toSecsSinceEpoch(),
+                                       dataPairArray[1].toDouble());
+                    }
                 }
                 if (startTime.addSecs(startTime.secsTo(QDateTime::fromSecsSinceEpoch(series->at(0).x()))) < timeAxis->min())
                     timeAxis->setMin(startTime.addSecs(startTime.secsTo(QDateTime::fromSecsSinceEpoch(series->at(0).x()))));
@@ -406,6 +423,18 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                     timeAxis->setMax(endTime);
                 contextChart->addSeries(series);
             }
+        }
+
+        if (!categoryValues.isEmpty())
+        {
+            categoryValues.removeDuplicates();
+            categoryValues.sort();
+            stringAxis->setRange(0, categoryValues.count() - 1);
+            for (auto i = 0; i < categoryValues.count(); i++)
+            {
+                stringAxis->append(categoryValues[i], i);
+            }
+            stringAxis->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
         }
         // Resize chart
         contextChart->createDefaultAxes();
@@ -417,6 +446,12 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         absTimeAxis->setTitleText("Absolute Time");
         contextChart->addAxis(absTimeAxis, Qt::AlignBottom);
         contextChart->axes()[3]->hide();
+
+        if (stringAxis->count() > 0)
+        {
+            contextChart->addAxis(stringAxis, Qt::AlignLeft);
+            contextChart->axes()[1]->hide();
+        }
 
         auto *gridLayout = new QGridLayout(window);
         auto *testCheck = new QCheckBox("test", window);

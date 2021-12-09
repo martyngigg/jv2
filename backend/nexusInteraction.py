@@ -81,7 +81,10 @@ def runData(file, fields, run):
         blockShape = value.shape
         blockData.append([run, field])
         for i in range(0, blockShape[0]):
-            blockData.append([float(time[i]), float(value[i])])
+            try:
+                blockData.append([float(time[i]), float(value[i])])
+            except(Exception):
+                blockData.append([float(time[i]), value[i][0].decode('UTF-8')])
         runData.append(blockData)
     return runData
 

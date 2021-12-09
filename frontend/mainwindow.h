@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow
     void fillInstruments();
     void initialiseElements();
     void goToCurrentFoundIndex(QModelIndex index);
+    void setLoadScreen(bool state);
     private slots:
     void on_filterBox_textChanged(const QString &arg1);
     void on_searchBox_textChanged(const QString &arg1);

@@ -40,10 +40,6 @@ void MainWindow::initialiseElements()
     // View menu for column toggles
     viewMenu_ = ui_->menubar->addMenu("View");
 
-    // Temporary nexus data menu
-    nexusMenu_ = ui_->menubar->addMenu("Nexus");
-    runsMenu_ = ui_->menubar->addMenu("Runs");
-
     // Allows re-arranging of table columns
     ui_->runDataTable->horizontalHeader()->setSectionsMovable(true);
     ui_->runDataTable->horizontalHeader()->setDragEnabled(true);
@@ -76,6 +72,8 @@ void MainWindow::initialiseElements()
     ui_->runDataTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui_->runDataTable, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
     contextMenu_ = new QMenu("Context");
+
+    on_closeFind_clicked();
 }
 
 // Sets cycle to most recently viewed
@@ -96,15 +94,11 @@ void MainWindow::recentCycle()
     {
         if (cycleIndex != -1)
             ui_->cyclesBox->setCurrentIndex(cycleIndex);
-        else if (ui_->cyclesBox->currentText() != "")
+        else
             ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
     }
     else
         ui_->cyclesBox->setEnabled(false);
-    if (cycleIndex != -1)
-        ui_->cyclesBox->setCurrentIndex(cycleIndex);
-    else
-        ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
 }
 
 // Fill instrument list
@@ -134,6 +128,52 @@ void MainWindow::closeEvent(QCloseEvent *event)
     worker->execute(input);
 
     event->accept();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F && event->modifiers() == Qt::ControlModifier)
+    {
+        if (ui_->searchBox->isVisible())
+            ui_->searchBox->setFocus();
+        else
+        {
+            ui_->searchSeperator->setVisible(true);
+            ui_->searchBox->setVisible(true);
+            ui_->findUp->setVisible(true);
+            ui_->findDown->setVisible(true);
+            ui_->searchAll->setVisible(true);
+            ui_->closeFind->setVisible(true);
+
+            ui_->searchBox->setFocus();
+        }
+    }
+    if (event->key() == Qt::Key_G && event->modifiers() == Qt::ControlModifier)
+    {
+        if (ui_->groupButton->isChecked())
+        {
+            ui_->groupButton->setChecked(false);
+            on_groupButton_clicked(false);
+        }
+        else
+        {
+            ui_->groupButton->setChecked(true);
+            on_groupButton_clicked(true);
+        }
+    }
+}
+
+void MainWindow::on_closeFind_clicked()
+{
+    ui_->searchSeperator->setVisible(false);
+    ui_->searchBox->setVisible(false);
+    ui_->findUp->setVisible(false);
+    ui_->findDown->setVisible(false);
+    ui_->searchAll->setVisible(false);
+    ui_->closeFind->setVisible(false);
+    if (ui_->searchLabel->text() != "")
+        ui_->runDataTable->selectionModel()->clearSelection();
+    ui_->searchLabel->setText("");
 }
 
 QList<QPair<QString, QString>> MainWindow::getInstruments()

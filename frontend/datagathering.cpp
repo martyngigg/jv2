@@ -34,10 +34,13 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
 
         // Keep cycle over instruments
         auto cycleIndex = ui_->cyclesBox->findText(cycleText);
-        if (cycleIndex != -1)
-            ui_->cyclesBox->setCurrentIndex(cycleIndex);
-        else
-            ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
+        if (!init_)
+        {
+            if (cycleIndex != -1)
+                ui_->cyclesBox->setCurrentIndex(cycleIndex);
+            else
+                ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
+        }
     }
     else
     {

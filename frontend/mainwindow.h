@@ -38,20 +38,16 @@ class MainWindow : public QMainWindow
     void on_searchBox_textChanged(const QString &arg1);
     void handle_result_instruments(HttpRequestWorker *worker);
     void handle_result_cycles(HttpRequestWorker *worker);
-    void handle_result_fieldQuery(HttpRequestWorker *worker);
-    void handle_result_logData(HttpRequestWorker *worker);
     void on_instrumentsBox_currentTextChanged(const QString &arg1);
     void on_cyclesBox_currentTextChanged(const QString &arg1);
     void on_groupButton_clicked(bool checked);
     void columnHider(int state);
-    void fieldToggled();
-    void runToggled();
     void on_clearSearchButton_clicked();
     void on_findUp_clicked();
     void on_findDown_clicked();
     void on_searchAll_clicked();
+    void on_closeFind_clicked();
     void recentCycle();
-    void on_graph_clicked();
     void customMenuRequested(QPoint pos);
     void handle_result_contextGraph(HttpRequestWorker *worker);
     void contextGraph();
@@ -63,14 +59,13 @@ class MainWindow : public QMainWindow
     protected:
     // Window close event
     void closeEvent(QCloseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
     private:
     Ui::MainWindow *ui_;
     JsonTableModel *model_;
     QSortFilterProxyModel *proxyModel_;
     QMenu *viewMenu_;
-    QMenu *nexusMenu_;
-    QMenu *runsMenu_;
     QMenu *contextMenu_;
     JsonTableModel::Header header_;
     QList<QString> desiredHeader_;

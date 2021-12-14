@@ -23,7 +23,15 @@ void MainWindow::on_searchBox_textChanged(const QString &arg1)
     }
     // Select first match
     if (foundIndices_.size() > 0)
+    {
         goToCurrentFoundIndex(foundIndices_[0]);
+        ui_->searchLabel->setText("1/" + QString::number(foundIndices_.size()));
+    }
+    else
+    {
+        ui_->runDataTable->selectionModel()->clearSelection();
+        ui_->searchLabel->setText("No results");
+    }
 }
 
 // Select previous match
@@ -37,6 +45,7 @@ void MainWindow::on_findUp_clicked()
         else
             currentFoundIndex_ = 0;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
+        ui_->searchLabel->setText(QString::number(currentFoundIndex_ + 1) + "/" + QString::number(foundIndices_.size()));
     }
 }
 
@@ -49,6 +58,7 @@ void MainWindow::on_findDown_clicked()
         if (currentFoundIndex_ < foundIndices_.size() - 1)
             currentFoundIndex_ += 1;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
+        ui_->searchLabel->setText(QString::number(currentFoundIndex_ + 1) + "/" + QString::number(foundIndices_.size()));
     }
 }
 
@@ -65,6 +75,7 @@ void MainWindow::on_searchAll_clicked()
             ui_->runDataTable->selectionModel()->setCurrentIndex(foundIndices_[i],
                                                                  QItemSelectionModel::Select | QItemSelectionModel::Rows);
         }
+        ui_->searchLabel->setText("Selecting " + QString::number(foundIndices_.size()) + " runs");
     }
 }
 void MainWindow::goToCurrentFoundIndex(QModelIndex index)

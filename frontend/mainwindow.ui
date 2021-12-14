@@ -245,7 +245,7 @@
              </widget>
             </item>
             <item>
-             <widget class="Line" name="line_2">
+             <widget class="Line" name="searchSeperator">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
@@ -327,6 +327,25 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="closeFind">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>x</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="searchLabel">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -338,32 +357,6 @@
                <string/>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="graph">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>graph</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </item>

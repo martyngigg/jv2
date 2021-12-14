@@ -2,6 +2,7 @@
 // Copyright (c) 2021 E. Devlin and T. Youngs
 
 #include "jsontablemodel.h"
+#include <QDebug>
 #include <QJsonObject>
 
 // Model to handle json data in table view

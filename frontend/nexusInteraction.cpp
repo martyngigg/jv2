@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 #include <QAction>
 #include <QCategoryAxis>
+#include <QChartView>
 #include <QDateTimeAxis>
 #include <QJsonArray>
 #include <QJsonDocument>

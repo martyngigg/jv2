@@ -55,15 +55,6 @@ void MainWindow::initialiseElements()
     else
         ui_->instrumentsBox->setCurrentIndex(ui_->instrumentsBox->count() - 1);
 
-    // Creates Chart
-    chart_ = new QChart;
-    ui_->chartView->setChart(chart_);
-
-    // Creates graph toggle
-    ui_->togglePage->addItem(tr("Data table"));
-    ui_->togglePage->addItem(tr("Data graph"));
-    connect(ui_->togglePage, QOverload<int>::of(&QComboBox::activated), ui_->stackedWidget, &QStackedWidget::setCurrentIndex);
-
     // Disables closing data tab + handles tab closing
     ui_->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
     connect(ui_->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(removeTab(int)));

@@ -29,6 +29,7 @@ find_package(
              Widgets
              Network
              Charts
+             Xml
              OpenGL
              OpenGLWidgets
              REQUIRED)
@@ -86,8 +87,9 @@ set(jv2_RES_QRC "frontend/icons.qrc")
 add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES} ${jv2_RES_QRC})
 
 target_link_libraries(
-  jv2 PRIVATE # External libs
-              Qt6::Widgets Qt6::Core Qt6::Network Qt6::Charts OpenGL::GL)
+  jv2
+  PRIVATE # External libs
+          Qt6::Widgets Qt6::Core Qt6::Network Qt6::Charts Qt6::Xml OpenGL::GL)
 
 set_target_properties(
   jv2

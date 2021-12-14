@@ -8,6 +8,7 @@
 #include "jsontablemodel.h"
 #include <QChart>
 #include <QCheckBox>
+#include <QDomDocument>
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
 
@@ -26,9 +27,11 @@ class MainWindow : public QMainWindow
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void fillInstruments();
+    void fillInstruments(QList<QPair<QString, QString>> instruments);
     void initialiseElements();
     void goToCurrentFoundIndex(QModelIndex index);
+    QList<QPair<QString, QString>> getInstruments();
+    QList<QString> getFields(QString instrument, QString instType);
     void setLoadScreen(bool state);
     private slots:
     void on_filterBox_textChanged(const QString &arg1);
@@ -55,6 +58,7 @@ class MainWindow : public QMainWindow
     void handle_result_contextMenu(HttpRequestWorker *worker);
     void removeTab(int index);
     void toggleAxis(int state);
+    void savePref();
 
     protected:
     // Window close event
@@ -70,8 +74,6 @@ class MainWindow : public QMainWindow
     QMenu *contextMenu_;
     JsonTableModel::Header header_;
     QList<QString> desiredHeader_;
-    QList<QString> muonHeader_;
-    QList<QString> neutronHeader_;
     QModelIndexList foundIndices_;
     int currentFoundIndex_;
     bool init_;

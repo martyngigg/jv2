@@ -1,0 +1,190 @@
+<xml>
+<insts>
+	<inst name="alf">
+		<location>ndxalf</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="argus">
+		<location>ndxargus</location>
+		<type>Muon</type>
+	</inst>
+	<inst name="chipir">
+		<location>ndxchipir</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="chronus">
+		<location>ndxchronus</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="crisp">
+		<location>ndxcrisp</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="emma">
+		<location>ndxemma</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="emu">
+		<location>ndxemu</location>
+		<type>Muon</type>
+	</inst>
+	<inst name="enginx">
+		<location>ndxenginx</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="gem">
+		<location>ndxgem</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="het">
+		<location>ndxenginx</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="hifi">
+		<location>ndxhifi</location>
+		<type>Muon</type>
+	</inst>
+	<inst name="hrpd">
+		<location>ndxhrpd</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="imat">
+		<location>ndximat</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="ines">
+		<location>ndxines</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="inter">
+		<location>ndxinter</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="iris">
+		<location>ndxiris</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="let">
+		<location>ndxlet</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="loq">
+		<location>ndxloq</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="maps">
+		<location>ndxmaps</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="mari">
+		<location>ndxmari</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="merlin">
+		<location>ndxmerlin</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="musr">
+		<location>ndxmusr</location>
+		<type>Muon</type>
+	</inst>
+	<inst name="nimrod">
+		<location>ndxnimrod</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="offspec">
+		<location>ndxoffspec</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="osiris">
+		<location>ndxosiris</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="pearl">
+		<location>ndxpearl</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="polaris">
+		<location>ndxpolaris</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="polref">
+		<location>ndxpolref</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="sandals">
+		<location>ndxsandals</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="sans2d">
+		<location>ndxsans2d</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="surf">
+		<location>ndxsurf</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="sxd">
+		<location>ndxsxd</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="tosca">
+		<location>ndxtosca</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="vesuvio">
+		<location>ndxevs</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="wish">
+		<location>ndxwish</location>
+		<type>Neutron</type>
+	</inst>
+	<inst name="zoom">
+		<location>ndxzoom</location>
+		<type>Neutron</type>
+	</inst>
+</insts>
+<jv2Fields>
+	<Neutron>
+		<Column name="Run No">
+		    <Data>run_number</Data>
+		</Column>
+		<Column name="Title">
+			<Data>title</Data>
+		</Column>
+		<Column name="UAmps">
+			<Data>proton_charge</Data>
+		</Column>
+		<Column name="Start Time">
+			<Data>start_time</Data>
+		</Column>
+		<Column name="Duration">
+			<Data>duration</Data>
+		</Column>
+		<Column name="User Name">
+			<Data>user_name</Data>
+		</Column>
+	</Neutron>
+	<Muon>
+		<Column name="Run No">
+			<Data>run_number</Data>
+		</Column>
+		<Column name="Title">
+			<Data>title</Data>
+		</Column>
+		<Column name="Mev">
+			<Data>total_mevents</Data>
+		</Column>
+		<Column name="Start Time">
+			<Data>start_time</Data>
+		</Column>
+		<Column name="Duration">
+			<Data>duration</Data>
+		</Column>
+		<Column name="User Name">
+			<Data>user_name</Data>
+		</Column>
+	</Muon>
+</jv2Fields>
+</xml>

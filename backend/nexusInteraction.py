@@ -32,6 +32,7 @@ def runTimes(file):
     startTime = mainGroup['start_time'][0].decode('UTF-8')
     endTime = mainGroup['end_time'][0].decode('UTF-8')
     return [startTime, endTime]
+
 # Access run data fields
 
 

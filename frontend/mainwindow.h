@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright (c) 2021 E. Devlin and T. Youngs
+// Copyright (c) 2022 E. Devlin and T. Youngs
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow
     void on_findUp_clicked();
     void on_findDown_clicked();
     void on_searchAll_clicked();
+    void on_massSearchButton_clicked();
     void on_closeFind_clicked();
     void recentCycle();
     void customMenuRequested(QPoint pos);

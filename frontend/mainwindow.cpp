@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright (c) 2021 E. Devlin and T. Youngs
+// Copyright (c) 2022 E. Devlin and T. Youngs
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -115,10 +115,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
     // Close server
     QString url_str = "http://127.0.0.1:5000/shutdown";
     HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    auto *worker = new HttpRequestWorker(this);
     worker->execute(input);
 
     event->accept();
+}
+
+void MainWindow::on_massSearchButton_clicked()
+{
+    QString url_str =
+        "http://127.0.0.1:5000/getAllJournals/" + ui_->instrumentsBox->currentText() + "/" + ui_->massSearchBox->text();
+    HttpRequestInput input(url_str);
+    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
+    worker->execute(input);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Copyright (c) 2021 E. Devlin and T. Youngs
+# Copyright (c) 2022 E. Devlin and T. Youngs
 
 from flask import Flask
 from flask import jsonify
@@ -7,8 +7,14 @@ from flask import request
 
 from urllib.request import urlopen
 from xml.etree.ElementTree import parse
+import lxml.etree as ET
+
+from ast import literal_eval
+
+from datetime import datetime
 
 import nexusInteraction
+
 app = Flask(__name__)
 
 # Shutdown flask server
@@ -79,6 +85,53 @@ def getJournal(instrument, cycle):
             runData[dataId] = dataValue
         fields.append(runData)
     return jsonify(fields)
+
+# Search all cycles
+
+
+@app.route('/getAllJournals/<instrument>/<search>')
+def getAllJournals(instrument, search):
+    allFields = []
+    nameSpace = {'data': 'http://definition.nexusformat.org/schema/3.0'}
+    cycles = literal_eval(getCycles(instrument).get_data().decode())
+    cycles.pop(0)
+
+    startTime = datetime.now()
+
+    for cycle in (cycles):
+        print(instrument, " ", cycle)
+        url = 'http://data.isis.rl.ac.uk/journals/ndx' + \
+            instrument+'/'+str(cycle)
+        try:
+            response = urlopen(url)
+        except Exception:
+            return jsonify({"response": "ERR. url not found"})
+        tree = ET.parse(response)
+        root = tree.getroot()
+        fields = []
+        """
+        foundElems = root.findall
+        ("./data:NXentry/[data:user_name='"+search+"']", nameSpace)
+        """
+        path = "//*[contains(data:user_name,'"+search+"')]"
+        foundElems = root.xpath(path, namespaces=nameSpace)
+        for element in foundElems:
+            runData = {}
+            for data in element:
+                dataId = data.tag.replace(
+                    '{http://definition.nexusformat.org/schema/3.0}', '')
+                try:
+                    dataValue = data.text.strip()
+                except Exception:
+                    dataValue = data.text
+                runData[dataId] = dataValue
+            fields.append(runData)
+        allFields += (fields)
+        print(len(foundElems))
+
+    endTime = datetime.now()
+    print(endTime - startTime)
+    return jsonify(allFields)
 
 # Close server
 

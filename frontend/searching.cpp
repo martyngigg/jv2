@@ -13,6 +13,7 @@ void MainWindow::on_searchBox_textChanged(const QString &arg1)
     if (arg1.isEmpty())
     {
         ui_->runDataTable->selectionModel()->clearSelection();
+        statusBar()->clearMessage();
         return;
     }
     // Find all occurences of search string in table elements
@@ -25,12 +26,12 @@ void MainWindow::on_searchBox_textChanged(const QString &arg1)
     if (foundIndices_.size() > 0)
     {
         goToCurrentFoundIndex(foundIndices_[0]);
-        ui_->searchLabel->setText("1/" + QString::number(foundIndices_.size()));
+        statusBar()->showMessage("1/" + QString::number(foundIndices_.size()));
     }
     else
     {
         ui_->runDataTable->selectionModel()->clearSelection();
-        ui_->searchLabel->setText("No results");
+        statusBar()->showMessage("No results");
     }
 }
 
@@ -45,7 +46,8 @@ void MainWindow::on_findUp_clicked()
         else
             currentFoundIndex_ = 0;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
-        ui_->searchLabel->setText(QString::number(currentFoundIndex_ + 1) + "/" + QString::number(foundIndices_.size()));
+        statusBar()->showMessage("Found run " + QString::number(currentFoundIndex_ + 1) + "/" +
+                                 QString::number(foundIndices_.size()));
     }
 }
 
@@ -58,7 +60,8 @@ void MainWindow::on_findDown_clicked()
         if (currentFoundIndex_ < foundIndices_.size() - 1)
             currentFoundIndex_ += 1;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
-        ui_->searchLabel->setText(QString::number(currentFoundIndex_ + 1) + "/" + QString::number(foundIndices_.size()));
+        statusBar()->showMessage("Found run " + QString::number(currentFoundIndex_ + 1) + "/" +
+                                 QString::number(foundIndices_.size()));
     }
 }
 
@@ -75,7 +78,7 @@ void MainWindow::on_searchAll_clicked()
             ui_->runDataTable->selectionModel()->setCurrentIndex(foundIndices_[i],
                                                                  QItemSelectionModel::Select | QItemSelectionModel::Rows);
         }
-        ui_->searchLabel->setText("Selecting " + QString::number(foundIndices_.size()) + " runs");
+        statusBar()->showMessage("Selecting " + QString::number(foundIndices_.size()) + " runs");
     }
 }
 void MainWindow::goToCurrentFoundIndex(QModelIndex index)

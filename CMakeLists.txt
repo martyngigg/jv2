@@ -49,7 +49,9 @@ set(PROJECT_SOURCES
     frontend/httprequestworker.cpp
     frontend/httprequestworker.h
     frontend/jsontablemodel.cpp
-    frontend/jsontablemodel.h)
+    frontend/jsontablemodel.h
+    frontend/chartview.cpp
+    frontend/chartview.h)
 
 if(WIN32)
   # Add global NOMINMAX define for Windows systems, and inhibit console creation

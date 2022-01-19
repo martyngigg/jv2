@@ -264,11 +264,13 @@ void MainWindow::savePref()
     auto nodelist = rootelem.elementsByTagName("inst");
 
     QString currentFields;
+    int realIndex;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
-        if (!ui_->runDataTable->isColumnHidden(i))
+        realIndex = ui_->runDataTable->horizontalHeader()->logicalIndex(i);
+        if (!ui_->runDataTable->isColumnHidden(realIndex))
         {
-            currentFields += ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString();
+            currentFields += ui_->runDataTable->horizontalHeader()->model()->headerData(realIndex, Qt::Horizontal).toString();
             currentFields += ",;";
         }
     }

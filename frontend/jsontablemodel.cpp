@@ -74,7 +74,22 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
                 QJsonValue v = obj[key];
 
                 if (v.isString())
+                {
+                    // if title = duration then format
+                    if (m_header[index.column()]["title"] == "duration")
+                    {
+                        int total, seconds, hours, minutes;
+                        total = v.toString().toInt();
+                        minutes = total / 60;
+                        seconds = total % 60;
+                        hours = minutes / 60;
+                        minutes = minutes % 60;
+                        return QString(QString::number(hours).rightJustified(2, '0') + ":" +
+                                       QString::number(minutes).rightJustified(2, '0') + ":" +
+                                       QString::number(seconds).rightJustified(2, '0'));
+                    }
                     return v.toString();
+                }
                 else if (v.isDouble())
                     return QString::number(v.toDouble());
                 else

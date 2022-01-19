@@ -99,11 +99,23 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             desiredHeader_ = getFields(ui_->instrumentsBox->currentText(), ui_->instrumentsBox->currentData().toString());
 
             // Filter table based on desired headers
-            if (!desiredHeader_.contains(key))
-                checkBox->setCheckState(Qt::Unchecked);
-            else
+            if (desiredHeader_.contains(key))
                 checkBox->setCheckState(Qt::Checked);
+            else
+                checkBox->setCheckState(Qt::Unchecked);
         }
+        int logIndex;
+        for (auto i = 0; i < desiredHeader_.count(); ++i)
+        {
+            for (auto j = 0; j < ui_->runDataTable->horizontalHeader()->count(); ++j)
+            {
+                logIndex = ui_->runDataTable->horizontalHeader()->logicalIndex(j);
+                if (desiredHeader_[i] ==
+                    ui_->runDataTable->horizontalHeader()->model()->headerData(logIndex, Qt::Horizontal).toString())
+                    ui_->runDataTable->horizontalHeader()->swapSections(j, i);
+            }
+        }
+        ui_->runDataTable->resizeColumnsToContents();
     }
     else
     {

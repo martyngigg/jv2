@@ -157,8 +157,8 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
     auto *window = new QWidget;
     auto *dateTimeChart = new QChart();
     auto *dateTimeChartView = new ChartView(dateTimeChart, window);
-    auto *absTimeChart = new QChart();
-    auto *absTimeChartView = new ChartView(absTimeChart, window);
+    auto *relTimeChart = new QChart();
+    auto *relTimeChartView = new ChartView(relTimeChart, window);
 
     QString msg;
     if (worker->error_type == QNetworkReply::NoError)
@@ -176,16 +176,17 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         QStringList categoryValues;
         dateTimeChart->addAxis(dateTimeStringAxis, Qt::AlignLeft);
 
-        auto *absTimeXAxis = new QValueAxis();
-        absTimeXAxis->setTitleText("Absolute Time");
-        absTimeChart->addAxis(absTimeXAxis, Qt::AlignBottom);
+        auto *relTimeXAxis = new QValueAxis();
+        relTimeXAxis->setTitleText("Relative Time (s)");
+        relTimeChart->addAxis(relTimeXAxis, Qt::AlignBottom);
 
-        auto *absTimeYAxis = new QValueAxis();
-        absTimeChart->addAxis(absTimeYAxis, Qt::AlignLeft);
+        auto *relTimeYAxis = new QValueAxis();
+        relTimeChart->addAxis(relTimeYAxis, Qt::AlignLeft);
 
-        auto *absTimeStringAxis = new QCategoryAxis();
-        absTimeChart->addAxis(absTimeStringAxis, Qt::AlignLeft);
+        auto *relTimeStringAxis = new QCategoryAxis();
+        relTimeChart->addAxis(relTimeStringAxis, Qt::AlignLeft);
 
+        QList<QString> chartFields;
         bool firstRun = true;
         // For each Run
         foreach (const auto &runFields, worker->json_array)
@@ -199,7 +200,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
             if (firstRun)
             {
                 timeAxis->setRange(startTime, endTime);
-                absTimeXAxis->setRange(0, 0);
+                relTimeXAxis->setRange(0, 0);
                 firstRun = false;
             }
 
@@ -210,12 +211,15 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
 
                 // For each plot point
                 auto *dateSeries = new QLineSeries();
-                auto *absSeries = new QLineSeries();
+                auto *relSeries = new QLineSeries();
 
                 // Set dateSeries ID
-                QString name = fieldDataArray.first()[0].toString() + " " + fieldDataArray.first()[1].toString();
+                QString name = fieldDataArray.first()[0].toString();
+                QString field = fieldDataArray.first()[1].toString().section(':', -1);
+                if (!chartFields.contains(field))
+                    chartFields.append(field);
                 dateSeries->setName(name);
-                absSeries->setName(name);
+                relSeries->setName(name);
                 fieldDataArray.removeFirst();
 
                 if (fieldDataArray.first()[1].isString())
@@ -226,7 +230,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                         categoryValues.append(dataPairArray[1].toString());
                         dateSeries->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
                                            dataPairArray[1].toString().right(2).toDouble());
-                        absSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toString().right(2).toDouble());
+                        relSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toString().right(2).toDouble());
                     }
                 }
                 else
@@ -236,7 +240,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                         auto dataPairArray = dataPair.toArray();
                         dateSeries->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
                                            dataPairArray[1].toDouble());
-                        absSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
+                        relSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
                         if (dataPairArray[1].toDouble() < dateTimeYAxis->min())
                             dateTimeYAxis->setMin(dataPairArray[1].toDouble());
                         if (dataPairArray[1].toDouble() > dateTimeYAxis->max())
@@ -250,24 +254,24 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                 if (endTime > timeAxis->max())
                     timeAxis->setMax(endTime);
 
-                if (absSeries->at(0).x() < absTimeXAxis->min())
-                    absTimeXAxis->setMin(absSeries->at(0).x());
-                if (absSeries->at(absSeries->count() - 1).x() > absTimeXAxis->max())
-                    absTimeXAxis->setMax(absSeries->at(absSeries->count() - 1).x());
+                if (relSeries->at(0).x() < relTimeXAxis->min())
+                    relTimeXAxis->setMin(relSeries->at(0).x());
+                if (relSeries->at(relSeries->count() - 1).x() > relTimeXAxis->max())
+                    relTimeXAxis->setMax(relSeries->at(relSeries->count() - 1).x());
 
                 dateTimeChart->addSeries(dateSeries);
                 dateSeries->attachAxis(timeAxis);
-                absTimeChart->addSeries(absSeries);
-                absSeries->attachAxis(absTimeXAxis);
+                relTimeChart->addSeries(relSeries);
+                relSeries->attachAxis(relTimeXAxis);
                 if (categoryValues.isEmpty())
                 {
                     dateSeries->attachAxis(dateTimeYAxis);
-                    absSeries->attachAxis(absTimeYAxis);
+                    relSeries->attachAxis(relTimeYAxis);
                 }
                 else
                 {
                     dateSeries->attachAxis(dateTimeStringAxis);
-                    absSeries->attachAxis(absTimeStringAxis);
+                    relSeries->attachAxis(relTimeStringAxis);
                 }
             }
         }
@@ -277,28 +281,41 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
             categoryValues.removeDuplicates();
             categoryValues.sort();
             dateTimeStringAxis->setRange(0, categoryValues.count() - 1);
-            absTimeStringAxis->setRange(0, categoryValues.count() - 1);
+            relTimeStringAxis->setRange(0, categoryValues.count() - 1);
             for (auto i = 0; i < categoryValues.count(); i++)
             {
                 dateTimeStringAxis->append(categoryValues[i], i);
-                absTimeStringAxis->append(categoryValues[i], i);
+                relTimeStringAxis->append(categoryValues[i], i);
             }
             dateTimeStringAxis->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-            absTimeStringAxis->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+            relTimeStringAxis->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
         }
 
-        absTimeYAxis->setRange(dateTimeYAxis->min(), dateTimeYAxis->max());
+        relTimeYAxis->setRange(dateTimeYAxis->min(), dateTimeYAxis->max());
 
         auto *gridLayout = new QGridLayout(window);
-        auto *axisToggleCheck = new QCheckBox("show absolute time", window);
+        auto *axisToggleCheck = new QCheckBox("show relative time", window);
 
         connect(axisToggleCheck, SIGNAL(stateChanged(int)), this, SLOT(toggleAxis(int)));
 
         gridLayout->addWidget(dateTimeChartView, 1, 0, -1, -1);
-        gridLayout->addWidget(absTimeChartView, 1, 0, -1, -1);
-        absTimeChartView->hide();
+        gridLayout->addWidget(relTimeChartView, 1, 0, -1, -1);
+        relTimeChartView->hide();
         gridLayout->addWidget(axisToggleCheck, 0, 0);
-        ui_->tabWidget->addTab(window, "graph");
+        QString tabName;
+        for (auto i = 0; i < chartFields.size(); i++)
+        {
+            tabName += chartFields[i];
+            if (i < chartFields.size() - 1)
+                tabName += ",";
+        }
+        ui_->tabWidget->addTab(window, tabName);
+        QString runs;
+        for (auto series : dateTimeChart->series())
+            runs.append(series->name() + ", ");
+        runs.chop(2);
+        QString toolTip = ui_->instrumentsBox->currentText() + "\n" + tabName + "\n" + runs;
+        ui_->tabWidget->setTabToolTip(ui_->tabWidget->count() - 1, toolTip);
         ui_->tabWidget->setCurrentIndex(ui_->tabWidget->count() - 1);
     }
     else

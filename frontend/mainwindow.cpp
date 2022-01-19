@@ -65,6 +65,8 @@ void MainWindow::initialiseElements()
     contextMenu_ = new QMenu("Context");
 
     ui_->searchContainer->setVisible(false);
+
+    connect(ui_->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 // Sets cycle to most recently viewed

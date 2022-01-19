@@ -46,7 +46,6 @@ class MainWindow : public QMainWindow
     void on_findUp_clicked();
     void on_findDown_clicked();
     void on_searchAll_clicked();
-    void on_massSearchButton_clicked();
     void on_closeFind_clicked();
     void recentCycle();
     void customMenuRequested(QPoint pos);
@@ -56,6 +55,11 @@ class MainWindow : public QMainWindow
     void removeTab(int index);
     void toggleAxis(int state);
     void savePref();
+    void massSearch(QString name, QString value);
+    void on_actionMassSearchRB_No_triggered();
+    void on_actionMassSearchTitle_triggered();
+    void on_actionMassSearchUser_triggered();
+    void on_actionClear_cached_searches_triggered();
 
     protected:
     // Window close event
@@ -67,6 +71,7 @@ class MainWindow : public QMainWindow
     JsonTableModel *model_;
     QSortFilterProxyModel *proxyModel_;
     QMenu *viewMenu_;
+    QMenu *findMenu_;
     QMenu *contextMenu_;
     JsonTableModel::Header header_;
     QList<QString> desiredHeader_;
@@ -75,5 +80,6 @@ class MainWindow : public QMainWindow
     bool init_;
     QChart *chart_;
     QPoint pos_;
+    QList<std::tuple<HttpRequestWorker *, QString>> cachedMassSearch_;
 };
 #endif // MAINWINDOW_H

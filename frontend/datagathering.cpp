@@ -128,6 +128,8 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 // Update cycles list when Instrument changed
 void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1)
 {
+    cachedMassSearch_.clear();
+
     // Handle possible undesired calls
     if (arg1.isEmpty())
     {
@@ -157,6 +159,19 @@ void MainWindow::on_cyclesBox_currentTextChanged(const QString &arg1)
     ui_->searchBox->setDisabled(arg1.isEmpty());
     if (arg1.isEmpty())
         return;
+
+    if (arg1[0] == '[')
+    {
+        for (auto tuple : cachedMassSearch_)
+        {
+            if (std::get<1>(tuple) == arg1.mid(1, arg1.length() - 2))
+            {
+                setLoadScreen(true);
+                handle_result_cycles(std::get<0>(tuple));
+            }
+        }
+        return;
+    }
 
     QString url_str = "http://127.0.0.1:5000/getJournal/" + ui_->instrumentsBox->currentText() + "/" + arg1;
     HttpRequestInput input(url_str);

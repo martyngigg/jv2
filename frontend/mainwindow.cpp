@@ -9,6 +9,7 @@
 #include <QCheckBox>
 #include <QDebug>
 #include <QDomDocument>
+#include <QInputDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -123,14 +124,35 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void MainWindow::on_massSearchButton_clicked()
+void MainWindow::massSearch(QString name, QString value)
 {
+    QString textInput =
+        QInputDialog::getText(this, tr("Enter search query"), tr(name.append(": ").toUtf8()), QLineEdit::Normal);
+    QString text = name.append(textInput);
+    if (text.isEmpty())
+        return;
+
+    for (auto tuple : cachedMassSearch_)
+    {
+        if (std::get<1>(tuple) == text)
+        {
+            ui_->cyclesBox->setCurrentText("[" + std::get<1>(tuple) + "]");
+            setLoadScreen(true);
+            handle_result_cycles(std::get<0>(tuple));
+            return;
+        }
+    }
+
     QString url_str =
-        "http://127.0.0.1:5000/getAllJournals/" + ui_->instrumentsBox->currentText() + "/" + ui_->massSearchBox->text();
+        "http://127.0.0.1:5000/getAllJournals/" + ui_->instrumentsBox->currentText() + "/" + value + "/" + textInput;
     HttpRequestInput input(url_str);
     HttpRequestWorker *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
     worker->execute(input);
+    cachedMassSearch_.append(std::make_tuple(worker, text));
+    ui_->cyclesBox->addItem("[" + text + "]");
+    ui_->cyclesBox->setCurrentText("[" + text + "]");
+    setLoadScreen(true);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -321,5 +343,23 @@ void MainWindow::setLoadScreen(bool state)
     {
         QWidget::setEnabled(true);
         QGuiApplication::restoreOverrideCursor();
+    }
+}
+
+void MainWindow::on_actionMassSearchRB_No_triggered() { massSearch("RB No.", "run_number"); }
+
+void MainWindow::on_actionMassSearchTitle_triggered() { massSearch("Title", "title"); }
+
+void MainWindow::on_actionMassSearchUser_triggered() { massSearch("User name", "user_name"); }
+
+void MainWindow::on_actionClear_cached_searches_triggered()
+{
+    cachedMassSearch_.clear();
+    for (auto i = ui_->cyclesBox->count() - 1; i >= 0; i--)
+    {
+        if (ui_->cyclesBox->itemText(i)[0] == '[')
+        {
+            ui_->cyclesBox->removeItem(i);
+        }
     }
 }

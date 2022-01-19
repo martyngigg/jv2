@@ -133,6 +133,49 @@ def getAllJournals(instrument, search):
     print(endTime - startTime)
     return jsonify(allFields)
 
+# Search all cycles with specified field
+
+
+@app.route('/getAllJournals/<instrument>/<field>/<search>')
+def getAllFieldJournals(instrument, field, search):
+    allFields = []
+    nameSpace = {'data': 'http://definition.nexusformat.org/schema/3.0'}
+    cycles = literal_eval(getCycles(instrument).get_data().decode())
+    cycles.pop(0)
+
+    startTime = datetime.now()
+
+    for cycle in (cycles):
+        print(instrument, " ", cycle)
+        url = 'http://data.isis.rl.ac.uk/journals/ndx' + \
+            instrument+'/'+str(cycle)
+        try:
+            response = urlopen(url)
+        except Exception:
+            return jsonify({"response": "ERR. url not found"})
+        tree = ET.parse(response)
+        root = tree.getroot()
+        fields = []
+        path = "//*[contains(data:"+field+",'"+search+"')]"
+        foundElems = root.xpath(path, namespaces=nameSpace)
+        for element in foundElems:
+            runData = {}
+            for data in element:
+                dataId = data.tag.replace(
+                    '{http://definition.nexusformat.org/schema/3.0}', '')
+                try:
+                    dataValue = data.text.strip()
+                except Exception:
+                    dataValue = data.text
+                runData[dataId] = dataValue
+            fields.append(runData)
+        allFields += (fields)
+        print(len(foundElems))
+
+    endTime = datetime.now()
+    print(endTime - startTime)
+    return jsonify(allFields)
+
 # Close server
 
 

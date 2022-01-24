@@ -55,6 +55,7 @@ class MainWindow : public QMainWindow
     void removeTab(int index);
     void toggleAxis(int state);
     void savePref();
+    void showStatus(qreal x, qreal y);
     void massSearch(QString name, QString value);
     void on_actionMassSearchRB_No_triggered();
     void on_actionMassSearchTitle_triggered();

@@ -213,6 +213,15 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                 auto *dateSeries = new QLineSeries();
                 auto *relSeries = new QLineSeries();
 
+                connect(dateSeries, SIGNAL(hovered(const QPointF, bool)), dateTimeChartView,
+                        SLOT(setHovered(const QPointF, bool)));
+                connect(dateTimeChartView, SIGNAL(showCoordinates(qreal, qreal)), this, SLOT(showStatus(qreal, qreal)));
+                connect(dateTimeChartView, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
+                connect(relSeries, SIGNAL(hovered(const QPointF, bool)), relTimeChartView,
+                        SLOT(setHovered(const QPointF, bool)));
+                connect(relTimeChartView, SIGNAL(showCoordinates(qreal, qreal)), this, SLOT(showStatus(qreal, qreal)));
+                connect(relTimeChartView, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
+
                 // Set dateSeries ID
                 QString name = fieldDataArray.first()[0].toString();
                 QString field = fieldDataArray.first()[1].toString().section(':', -1);
@@ -317,6 +326,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         QString toolTip = ui_->instrumentsBox->currentText() + "\n" + tabName + "\n" + runs;
         ui_->tabWidget->setTabToolTip(ui_->tabWidget->count() - 1, toolTip);
         ui_->tabWidget->setCurrentIndex(ui_->tabWidget->count() - 1);
+        dateTimeChartView->setFocus();
     }
     else
     {
@@ -337,10 +347,27 @@ void MainWindow::toggleAxis(int state)
     {
         tabCharts[0]->hide();
         tabCharts[1]->show();
+        tabCharts[1]->setFocus();
     }
     else
     {
         tabCharts[0]->show();
+        tabCharts[0]->setFocus();
         tabCharts[1]->hide();
+    }
+}
+
+void MainWindow::showStatus(qreal x, qreal y)
+{
+    auto *chartView = qobject_cast<ChartView *>(sender());
+    if (QString(chartView->chart()->axes(Qt::Horizontal)[0]->metaObject()->className()) == QString("QDateTimeAxis"))
+    {
+        QString message = QDateTime::fromMSecsSinceEpoch(x).toString("yyyy-MM-dd HH:mm:ss") + ", " + QString::number(y);
+        statusBar()->showMessage(message);
+    }
+    else
+    {
+        QString message = QString::number(x) + ", " + QString::number(y);
+        statusBar()->showMessage(message);
     }
 }

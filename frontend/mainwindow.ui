@@ -366,7 +366,7 @@
      <string>File</string>
     </property>
     <addaction name="action_Quit"/>
-   </widget>                       
+   </widget>
    <widget class="QMenu" name="menuFind">
     <property name="title">
      <string>Find</string>
@@ -381,6 +381,7 @@
     </widget>
     <addaction name="menuSearch_across_cycles"/>
     <addaction name="actionClear_cached_searches"/>
+    <addaction name="actionGo_to"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFind"/>
@@ -409,6 +410,11 @@
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="actionGo_to">
+   <property name="text">
+    <string>Go to specific run number</string>
    </property>
   </action>
  </widget>

@@ -26,12 +26,12 @@ void MainWindow::customMenuRequested(QPoint pos)
     auto selectedRuns = ui_->runDataTable->selectionModel()->selectedRows();
 
     // Finds run number location in table
-    int runNoColum;
+    int runNoColumn;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
         if (ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString() == "run_number")
         {
-            runNoColum = i;
+            runNoColumn = i;
             break;
         }
     }
@@ -42,7 +42,7 @@ void MainWindow::customMenuRequested(QPoint pos)
 
     for (auto run : selectedRuns)
     {
-        runNo = model_->index(run.row(), runNoColum).data().toString();
+        runNo = model_->index(run.row(), runNoColumn).data().toString();
         runNos.append(runNo + ";");
     }
     // Removes final ";"
@@ -95,6 +95,10 @@ void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
                 subMenu->addAction(action);
             }
         }
+
+        auto *action = new QAction("Select runs with same title", this);
+        connect(action, SIGNAL(triggered()), this, SLOT(selectSimilar()));
+        contextMenu_->addAction(action);
         contextMenu_->popup(ui_->runDataTable->viewport()->mapToGlobal(pos_));
     }
     else
@@ -113,12 +117,12 @@ void MainWindow::contextGraph()
     // Gathers all selected runs
     auto selectedRuns = ui_->runDataTable->selectionModel()->selectedRows();
     // Finds run number location in table
-    int runNoColum;
+    int runNoColumn;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
         if (ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString() == "run_number")
         {
-            runNoColum = i;
+            runNoColumn = i;
             break;
         }
     }
@@ -128,7 +132,7 @@ void MainWindow::contextGraph()
     // Concats runs
     for (auto run : selectedRuns)
     {
-        runNo = model_->index(run.row(), runNoColum).data().toString();
+        runNo = model_->index(run.row(), runNoColumn).data().toString();
         runNos.append(runNo + ";");
     }
     // Removes final ";"

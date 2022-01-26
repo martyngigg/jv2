@@ -17,10 +17,12 @@ void MainWindow::on_searchBox_textChanged(const QString &arg1)
         return;
     }
     // Find all occurences of search string in table elements
-    for (auto i = 0; i < proxyModel_->rowCount(); ++i)
+    for (auto i = 0; i < proxyModel_->columnCount(); ++i)
     {
-        if (ui_->runDataTable->isColumnHidden(i) == false)
-            foundIndices_.append(proxyModel_->match(proxyModel_->index(0, i), Qt::DisplayRole, arg1, -1, Qt::MatchContains));
+        auto location = ui_->runDataTable->horizontalHeader()->logicalIndex(i);
+        if (ui_->runDataTable->isColumnHidden(location) == false)
+            foundIndices_.append(
+                proxyModel_->match(proxyModel_->index(0, location), Qt::DisplayRole, arg1, -1, Qt::MatchContains));
     }
     // Select first match
     if (foundIndices_.size() > 0)

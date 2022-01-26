@@ -116,6 +116,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             }
         }
         ui_->runDataTable->resizeColumnsToContents();
+        emit tableFilled();
     }
     else
     {

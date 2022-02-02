@@ -29,7 +29,7 @@ void MainWindow::customMenuRequested(QPoint pos)
     int runNoColumn;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
-        if (ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString() == "run_number")
+        if (model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() == "run_number")
         {
             runNoColumn = i;
             break;
@@ -120,7 +120,7 @@ void MainWindow::contextGraph()
     int runNoColumn;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
-        if (ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString() == "run_number")
+        if (model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() == "run_number")
         {
             runNoColumn = i;
             break;

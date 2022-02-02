@@ -32,7 +32,6 @@ MainWindow::~MainWindow() { delete ui_; }
 // Configure initial application state
 void MainWindow::initialiseElements()
 {
-    ui_->instrumentsBox->hide();
     auto instruments = getInstruments();
     fillInstruments(instruments);
 
@@ -71,9 +70,11 @@ void MainWindow::initialiseElements()
     connect(ui_->runDataTable, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
     contextMenu_ = new QMenu("Context");
 
-    ui_->searchContainer->setVisible(false);
-
     connect(ui_->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
+
+    searchString_ = "";
+
+    ui_->runDataTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 
 // Sets cycle to most recently viewed
@@ -113,10 +114,11 @@ void MainWindow::fillInstruments(QList<QPair<QString, QString>> instruments)
     }
 }
 
+// Handle Instrument selection
 void MainWindow::changeInst(QPair<QString, QString> instrument)
 {
     ui_->instrumentButton->setText(instrument.first.toUpper());
-    on_instrumentsBox_currentTextChanged(instrument.first);
+    currentInstrumentChanged(instrument.first);
     instType_ = instrument.second;
     instName_ = instrument.first;
 }
@@ -160,6 +162,7 @@ void MainWindow::massSearch(QString name, QString value)
     HttpRequestWorker *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
     worker->execute(input);
+
     cachedMassSearch_.append(std::make_tuple(worker, text));
     ui_->cyclesBox->addItem("[" + text + "]");
     ui_->cyclesBox->setCurrentText("[" + text + "]");
@@ -168,47 +171,22 @@ void MainWindow::massSearch(QString name, QString value)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    /*
-    if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
-    {
-        if (ui_->searchContainer->isVisible())
-            ui_->searchContainer->setVisible(false);
-    }
-    if (event->key() == Qt::Key_F && event->modifiers() == Qt::ControlModifier)
-    {
-        if (!ui_->searchContainer->isVisible())
-            ui_->searchContainer->setVisible(true);
-        ui_->searchBox->setFocus();
-    }
-    */
     if (event->key() == Qt::Key_G && event->modifiers() == Qt::ControlModifier)
     {
         bool checked = ui_->groupButton->isChecked();
         ui_->groupButton->setChecked(!checked);
         on_groupButton_clicked(!checked);
     }
-    if (event->key() == Qt::Key_F3 && event->modifiers() == Qt::ControlModifier)
+    if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
     {
-        on_searchAll_clicked();
+        searchString_ = "";
+        updateSearch(searchString_);
         return;
     }
-    if (event->key() == Qt::Key_F3 && event->modifiers() == Qt::ShiftModifier)
-    {
-        on_findUp_clicked();
-        return;
-    }
-    if (event->key() == Qt::Key_F3)
-        on_findDown_clicked();
+    event->accept();
 }
 
-void MainWindow::on_closeFind_clicked()
-{
-    ui_->searchContainer->setVisible(false);
-    if (statusBar()->currentMessage() != "")
-        ui_->runDataTable->selectionModel()->clearSelection();
-    statusBar()->clearMessage();
-}
-
+// Get instrument data from config file
 QList<QPair<QString, QString>> MainWindow::getInstruments()
 {
     QFile file("../extra/instrumentData.xml");
@@ -234,6 +212,7 @@ QList<QPair<QString, QString>> MainWindow::getInstruments()
     return instruments;
 }
 
+// Get the desired fields and their titles
 std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrument, QString instType)
 {
     std::vector<std::pair<QString, QString>> desiredInstFields;
@@ -257,11 +236,12 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
             break;
         }
     }
+    // If inst preferences blank
     if (desiredInstrumentFields.isEmpty())
     {
         auto configDefault = rootelem.elementsByTagName(instType).item(0).toElement();
         auto configDefaultFields = configDefault.elementsByTagName("Column");
-
+        // If config preferences blank
         if (configDefaultFields.isEmpty())
         {
             QFile file("../extra/instrumentData.xml");
@@ -270,6 +250,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
             file.close();
             auto rootelem = dom.documentElement();
             auto defaultColumns = rootelem.elementsByTagName(instType).item(0).toElement().elementsByTagName("Column");
+            // Get config preferences
             for (int i = 0; i < defaultColumns.count(); i++)
             {
                 // Get column index and title from xml
@@ -279,6 +260,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
             }
             return desiredInstFields;
         }
+        // Get config default
         for (int i = 0; i < configDefaultFields.count(); i++)
         {
             column.first = configDefaultFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
@@ -287,6 +269,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
         }
         return desiredInstFields;
     }
+    // Get instrument preferences
     for (int i = 0; i < desiredInstrumentFields.count(); i++)
     {
         column.first = desiredInstrumentFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
@@ -307,7 +290,7 @@ void MainWindow::savePref()
 
     auto rootelem = dom.documentElement();
     auto nodelist = rootelem.elementsByTagName("inst");
-
+    // Get current table fields
     QString currentFields;
     int realIndex;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
@@ -315,12 +298,15 @@ void MainWindow::savePref()
         realIndex = ui_->runDataTable->horizontalHeader()->logicalIndex(i);
         if (!ui_->runDataTable->isColumnHidden(realIndex))
         {
-            currentFields += ui_->runDataTable->horizontalHeader()->model()->headerData(realIndex, Qt::Horizontal).toString();
+            currentFields += model_->headerData(realIndex, Qt::Horizontal, Qt::UserRole).toString();
+            currentFields += ",";
+            currentFields += model_->headerData(realIndex, Qt::Horizontal).toString();
             currentFields += ",;";
         }
     }
     currentFields.chop(1);
 
+    // Add preferences to xml file
     QDomNode node;
     QDomElement elem;
     QDomElement columns;
@@ -338,8 +324,8 @@ void MainWindow::savePref()
             {
                 auto preferredFieldsElem = dom.createElement("Column");
                 auto preferredFieldsDataElem = dom.createElement("Data");
-                preferredFieldsElem.setAttribute("Title", "placeholder");
-                preferredFieldsDataElem.appendChild(dom.createTextNode(field.left(field.indexOf(","))));
+                preferredFieldsElem.setAttribute("Title", field.split(",")[1]);
+                preferredFieldsDataElem.appendChild(dom.createTextNode(field.split(",")[0]));
                 preferredFieldsElem.appendChild(preferredFieldsDataElem);
                 columns.appendChild(preferredFieldsElem);
             }
@@ -367,131 +353,4 @@ void MainWindow::setLoadScreen(bool state)
         QWidget::setEnabled(true);
         QGuiApplication::restoreOverrideCursor();
     }
-}
-
-void MainWindow::on_actionMassSearchRB_No_triggered() { massSearch("RB No.", "run_number"); }
-
-void MainWindow::on_actionMassSearchTitle_triggered() { massSearch("Title", "title"); }
-
-void MainWindow::on_actionMassSearchUser_triggered() { massSearch("User name", "user_name"); }
-
-void MainWindow::on_actionClear_cached_searches_triggered()
-{
-    cachedMassSearch_.clear();
-    for (auto i = ui_->cyclesBox->count() - 1; i >= 0; i--)
-    {
-        if (ui_->cyclesBox->itemText(i)[0] == '[')
-        {
-            ui_->cyclesBox->removeItem(i);
-        }
-    }
-}
-
-void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
-{
-    setLoadScreen(false);
-    QString msg;
-
-    if (worker->error_type == QNetworkReply::NoError)
-    {
-        if (worker->response == "Not Found")
-        {
-            statusBar()->showMessage("Run number not found", 5000);
-            return;
-        }
-
-        if (ui_->cyclesBox->currentText() == worker->response)
-        {
-            selectIndex(runNumber);
-            return;
-        }
-        connect(this, &MainWindow::tableFilled, [=]() { selectIndex(runNumber); });
-        ui_->cyclesBox->setCurrentText(worker->response);
-    }
-    else
-    {
-        // an error occurred
-        msg = "Error1: " + worker->error_str;
-        QMessageBox::information(this, "", msg);
-    }
-}
-
-void MainWindow::selectIndex(QString runNumber)
-{
-    ui_->runDataTable->selectionModel()->clearSelection();
-
-    on_searchBox_textChanged(runNumber);
-    statusBar()->showMessage("Found run " + runNumber + " in " + ui_->cyclesBox->currentText(), 5000);
-    disconnect(this, &MainWindow::tableFilled, nullptr, nullptr);
-}
-
-void MainWindow::selectSimilar()
-{
-    int TitleColumn;
-    for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
-    {
-        if (ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString() == "title")
-        {
-            TitleColumn = i;
-            break;
-        }
-    }
-    QString title = model_->index(ui_->runDataTable->rowAt(pos_.y()), TitleColumn).data().toString();
-    for (auto i = 0; i < model_->rowCount(); i++)
-    {
-        if (model_->index(i, TitleColumn).data().toString() == title)
-            ui_->runDataTable->selectionModel()->setCurrentIndex(model_->index(i, TitleColumn),
-                                                                 QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
-}
-void MainWindow::on_actionSearch_triggered()
-{
-    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("search runs for:"), QLineEdit::Normal);
-    searchString_ = textInput;
-    foundIndices_.clear();
-    currentFoundIndex_ = 0;
-    if (textInput.isEmpty())
-    {
-        ui_->runDataTable->selectionModel()->clearSelection();
-        statusBar()->clearMessage();
-        return;
-    }
-    // Find all occurences of search string in table elements
-    for (auto i = 0; i < proxyModel_->columnCount(); ++i)
-    {
-        auto location = ui_->runDataTable->horizontalHeader()->logicalIndex(i);
-        if (ui_->runDataTable->isColumnHidden(location) == false)
-            foundIndices_.append(
-                proxyModel_->match(proxyModel_->index(0, location), Qt::DisplayRole, textInput, -1, Qt::MatchContains));
-    }
-    // Select first match
-    if (foundIndices_.size() > 0)
-    {
-        goToCurrentFoundIndex(foundIndices_[0]);
-        statusBar()->showMessage("Find \"" + searchString_ + "\": 1/" + QString::number(foundIndices_.size()) + " Results");
-    }
-    else
-    {
-        ui_->runDataTable->selectionModel()->clearSelection();
-        statusBar()->showMessage("No results");
-    }
-}
-
-void MainWindow::on_actionSelectNext_triggered() { on_findDown_clicked(); }
-void MainWindow::on_actionSelectPrevious_triggered() { on_findUp_clicked(); }
-void MainWindow::on_actionSelectAll_triggered() { on_searchAll_clicked(); }
-
-void MainWindow::on_actionRun_Number_triggered()
-{
-    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("Run No: "), QLineEdit::Normal);
-    if (textInput.isEmpty())
-        return;
-
-    QString url_str = "http://127.0.0.1:5000/getGoToCycle/" + instName_ + "/" + textInput;
-    HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
-    connect(worker, &HttpRequestWorker::on_execution_finished,
-            [=](HttpRequestWorker *workerProxy) { goTo(workerProxy, textInput); });
-    worker->execute(input);
-    setLoadScreen(true);
 }

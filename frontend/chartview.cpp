@@ -116,6 +116,7 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
     QChartView::mouseReleaseEvent(event);
 }
 
+// Set value for hover behaviour
 void ChartView::setHovered(const QPointF point, bool hovered) { hovered_ = hovered; }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)

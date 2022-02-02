@@ -65,7 +65,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
     if (worker->error_type == QNetworkReply::NoError)
     {
         // Get desired fields and titles from config files
-        desiredHeader_ = getFields(ui_->instrumentsBox->currentText(), ui_->instrumentsBox->currentData().toString());
+        desiredHeader_ = getFields(instName_, instType_);
         auto jsonArray = worker->json_array;
         auto jsonObject = jsonArray.at(0).toObject();
         // Add columns to header and give titles where applicable
@@ -104,8 +104,6 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             viewMenu_->addAction(checkableAction);
             connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));
 
-            desiredHeader_ = getFields(instName_, instType_);
-
             // Filter table based on desired headers
             auto it = std::find_if(desiredHeader_.begin(), desiredHeader_.end(),
                                    [key](const auto &data) { return data.first == key; });
@@ -129,6 +127,8 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             }
         }
         ui_->runDataTable->resizeColumnsToContents();
+        updateSearch(searchString_);
+        ui_->filterBox->clear();
         emit tableFilled();
     }
     else
@@ -140,7 +140,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 }
 
 // Update cycles list when Instrument changed
-void MainWindow::on_instrumentsBox_currentTextChanged(const QString &arg1)
+void MainWindow::currentInstrumentChanged(const QString &arg1)
 {
     cachedMassSearch_.clear();
 
@@ -162,7 +162,6 @@ void MainWindow::on_cyclesBox_currentTextChanged(const QString &arg1)
     // Handle possible undesired calls
     ui_->cyclesBox->setDisabled(arg1.isEmpty());
     ui_->filterBox->setDisabled(arg1.isEmpty());
-    ui_->searchBox->setDisabled(arg1.isEmpty());
     if (arg1.isEmpty())
         return;
 

@@ -9,6 +9,9 @@
 JsonTableModel::JsonTableModel(const JsonTableModel::Header &header_, QObject *parent)
     : QAbstractTableModel(parent), m_header(header_)
 {
+    m_groupedHeader.push_back(Heading({{"title", "Title"}, {"index", "title"}}));
+    m_groupedHeader.push_back(Heading({{"title", "Total Duration"}, {"index", "duration"}}));
+    m_groupedHeader.push_back(Heading({{"title", "Run Numbers"}, {"index", "run_number"}}));
 }
 
 // Sets json data to populate table
@@ -79,7 +82,7 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
                 if (v.isString())
                 {
                     // if title = duration then format
-                    if (m_header[index.column()]["title"] == "duration")
+                    if (m_header[index.column()]["index"] == "duration")
                     {
                         int total, seconds, hours, minutes;
                         total = v.toString().toInt();
@@ -127,7 +130,7 @@ void JsonTableModel::groupData()
             {
                 auto totalRunTime = std::get<1>(data).toInt() + valueObj["duration"].toString().toInt();
                 std::get<1>(data) = QString::number(totalRunTime);
-                std::get<2>(data) += "-" + valueObj["run_number"].toString();
+                std::get<2>(data) += ";" + valueObj["run_number"].toString();
                 unique = false;
                 break;
             }
@@ -148,12 +151,7 @@ void JsonTableModel::groupData()
     m_holdHeader = m_header;
 
     // Get and assign array headers
-    Header header_;
-    foreach (const QString &key, groupedJson.at(0).toObject().keys())
-    {
-        header_.push_back(Heading({{"title", key}, {"index", key}}));
-    }
-    setHeader(header_);
+    setHeader(m_groupedHeader);
     setJson(groupedJson);
 }
 

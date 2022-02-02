@@ -38,6 +38,7 @@ class JsonTableModel : public QAbstractTableModel
     private:
     Header m_header;
     Header m_holdHeader;
+    Header m_groupedHeader;
     QJsonArray m_json;
     QJsonArray m_holdJson;
 };

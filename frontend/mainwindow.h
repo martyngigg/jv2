@@ -61,10 +61,15 @@ class MainWindow : public QMainWindow
     void on_actionMassSearchTitle_triggered();
     void on_actionMassSearchUser_triggered();
     void on_actionClear_cached_searches_triggered();
-    void on_actionGo_to_triggered();
     void goTo(HttpRequestWorker *worker, QString runNumber);
     void selectIndex(QString runNumber);
     void selectSimilar();
+    void changeInst(QPair<QString, QString> instrument);
+    void on_actionSearch_triggered();
+    void on_actionSelectNext_triggered();
+    void on_actionSelectPrevious_triggered();
+    void on_actionSelectAll_triggered();
+    void on_actionRun_Number_triggered();
 
     protected:
     // Window close event
@@ -81,6 +86,7 @@ class MainWindow : public QMainWindow
     QMenu *viewMenu_;
     QMenu *findMenu_;
     QMenu *contextMenu_;
+    QMenu *instrumentsMenu_;
     JsonTableModel::Header header_;
     std::vector<std::pair<QString, QString>> desiredHeader_;
     QModelIndexList foundIndices_;
@@ -89,5 +95,8 @@ class MainWindow : public QMainWindow
     QChart *chart_;
     QPoint pos_;
     QList<std::tuple<HttpRequestWorker *, QString>> cachedMassSearch_;
+    QString searchString_;
+    QString instType_;
+    QString instName_;
 };
 #endif // MAINWINDOW_H

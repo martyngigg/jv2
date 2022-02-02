@@ -28,7 +28,7 @@ void MainWindow::on_searchBox_textChanged(const QString &arg1)
     if (foundIndices_.size() > 0)
     {
         goToCurrentFoundIndex(foundIndices_[0]);
-        statusBar()->showMessage("1/" + QString::number(foundIndices_.size()));
+        statusBar()->showMessage("Find \"" + searchString_ + "\": 1/" + QString::number(foundIndices_.size()) + " Results");
     }
     else
     {
@@ -48,8 +48,8 @@ void MainWindow::on_findUp_clicked()
         else
             currentFoundIndex_ = 0;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
-        statusBar()->showMessage("Found run " + QString::number(currentFoundIndex_ + 1) + "/" +
-                                 QString::number(foundIndices_.size()));
+        statusBar()->showMessage("Find \"" + searchString_ + "\": " + QString::number(currentFoundIndex_ + 1) + "/" +
+                                 QString::number(foundIndices_.size()) + " Results");
     }
 }
 
@@ -62,8 +62,8 @@ void MainWindow::on_findDown_clicked()
         if (currentFoundIndex_ < foundIndices_.size() - 1)
             currentFoundIndex_ += 1;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
-        statusBar()->showMessage("Found run " + QString::number(currentFoundIndex_ + 1) + "/" +
-                                 QString::number(foundIndices_.size()));
+        statusBar()->showMessage("Find \"" + searchString_ + "\": " + QString::number(currentFoundIndex_ + 1) + "/" +
+                                 QString::number(foundIndices_.size()) + " Results");
     }
 }
 
@@ -80,7 +80,8 @@ void MainWindow::on_searchAll_clicked()
             ui_->runDataTable->selectionModel()->setCurrentIndex(foundIndices_[i],
                                                                  QItemSelectionModel::Select | QItemSelectionModel::Rows);
         }
-        statusBar()->showMessage("Selecting " + QString::number(foundIndices_.size()) + " runs");
+        statusBar()->showMessage("Find \"" + searchString_ + "\": Selecting " + QString::number(foundIndices_.size()) +
+                                 " Results");
     }
 }
 void MainWindow::goToCurrentFoundIndex(QModelIndex index)

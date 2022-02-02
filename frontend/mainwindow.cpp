@@ -32,6 +32,7 @@ MainWindow::~MainWindow() { delete ui_; }
 // Configure initial application state
 void MainWindow::initialiseElements()
 {
+    ui_->instrumentsBox->hide();
     auto instruments = getInstruments();
     fillInstruments(instruments);
 
@@ -50,11 +51,16 @@ void MainWindow::initialiseElements()
     // Sets instrument to last used
     QSettings settings;
     QString recentInstrument = settings.value("recentInstrument").toString();
-    auto instrumentIndex = ui_->instrumentsBox->findText(recentInstrument);
-    if (instrumentIndex != -1)
-        ui_->instrumentsBox->setCurrentIndex(instrumentIndex);
-    else
-        ui_->instrumentsBox->setCurrentIndex(ui_->instrumentsBox->count() - 1);
+    int instrumentIndex = -1;
+    bool found = false;
+    for (auto i = 0; i < instrumentsMenu_->actions().count(); i++)
+        if (instrumentsMenu_->actions()[i]->text() == recentInstrument)
+        {
+            instrumentsMenu_->actions()[i]->trigger();
+            found = true;
+        }
+    if (!found)
+        instrumentsMenu_->actions()[instrumentsMenu_->actions().count() - 1]->trigger();
 
     // Disables closing data tab + handles tab closing
     ui_->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
@@ -75,16 +81,13 @@ void MainWindow::recentCycle()
 {
     // Disable selections if api fails
     if (ui_->cyclesBox->count() == 0)
-    {
-        ui_->instrumentsBox->clear();
         QWidget::setEnabled(false);
-    }
     QSettings settings;
     QString recentCycle = settings.value("recentCycle").toString();
     auto cycleIndex = ui_->cyclesBox->findText(recentCycle);
 
     // Sets cycle to last used/ most recent if unavailable
-    if (ui_->instrumentsBox->currentText() != "")
+    if (instName_ != "")
     {
         if (cycleIndex != -1)
             ui_->cyclesBox->setCurrentIndex(cycleIndex);
@@ -99,18 +102,29 @@ void MainWindow::recentCycle()
 void MainWindow::fillInstruments(QList<QPair<QString, QString>> instruments)
 {
     // Only allow calls after initial population
-    ui_->instrumentsBox->blockSignals(true);
-    ui_->instrumentsBox->clear();
+    instrumentsMenu_ = new QMenu("test");
+    connect(ui_->instrumentButton, &QPushButton::clicked,
+            [=]() { instrumentsMenu_->exec(ui_->instrumentButton->mapToGlobal(QPoint(0, ui_->instrumentButton->height()))); });
     foreach (const auto instrument, instruments)
-        ui_->instrumentsBox->addItem(instrument.first, instrument.second);
-    ui_->instrumentsBox->blockSignals(false);
+    {
+        auto *action = new QAction(instrument.first, this);
+        connect(action, &QAction::triggered, [=]() { changeInst(instrument); });
+        instrumentsMenu_->addAction(action);
+    }
 }
 
+void MainWindow::changeInst(QPair<QString, QString> instrument)
+{
+    ui_->instrumentButton->setText(instrument.first.toUpper());
+    on_instrumentsBox_currentTextChanged(instrument.first);
+    instType_ = instrument.second;
+    instName_ = instrument.first;
+}
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Update history on close
     QSettings settings;
-    settings.setValue("recentInstrument", ui_->instrumentsBox->currentText());
+    settings.setValue("recentInstrument", instName_.toLower());
     settings.setValue("recentCycle", ui_->cyclesBox->currentText());
 
     // Close server
@@ -141,8 +155,7 @@ void MainWindow::massSearch(QString name, QString value)
         }
     }
 
-    QString url_str =
-        "http://127.0.0.1:5000/getAllJournals/" + ui_->instrumentsBox->currentText() + "/" + value + "/" + textInput;
+    QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput;
     HttpRequestInput input(url_str);
     HttpRequestWorker *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
@@ -155,6 +168,7 @@ void MainWindow::massSearch(QString name, QString value)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    /*
     if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
     {
         if (ui_->searchContainer->isVisible())
@@ -166,11 +180,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             ui_->searchContainer->setVisible(true);
         ui_->searchBox->setFocus();
     }
+    */
     if (event->key() == Qt::Key_G && event->modifiers() == Qt::ControlModifier)
     {
         bool checked = ui_->groupButton->isChecked();
         ui_->groupButton->setChecked(!checked);
         on_groupButton_clicked(!checked);
+    }
+    if (event->key() == Qt::Key_F3 && event->modifiers() == Qt::ControlModifier)
+    {
+        on_searchAll_clicked();
+        return;
     }
     if (event->key() == Qt::Key_F3 && event->modifiers() == Qt::ShiftModifier)
     {
@@ -231,7 +251,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
     auto instList = rootelem.elementsByTagName("inst");
     for (auto i = 0; i < instList.count(); i++)
     {
-        if (instList.item(i).toElement().attribute("name") == instrument)
+        if (instList.item(i).toElement().attribute("name").toLower() == instrument)
         {
             desiredInstrumentFields = instList.item(i).toElement().elementsByTagName("Column");
             break;
@@ -308,7 +328,7 @@ void MainWindow::savePref()
     {
         node = nodelist.item(i);
         elem = node.toElement();
-        if (elem.attribute("name") == ui_->instrumentsBox->currentText())
+        if (elem.attribute("name") == instName_)
         {
             auto oldColumns = elem.elementsByTagName("Columns");
             if (!oldColumns.isEmpty())
@@ -367,21 +387,6 @@ void MainWindow::on_actionClear_cached_searches_triggered()
     }
 }
 
-void MainWindow::on_actionGo_to_triggered()
-{
-    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("Run No: "), QLineEdit::Normal);
-    if (textInput.isEmpty())
-        return;
-
-    QString url_str = "http://127.0.0.1:5000/getGoToCycle/" + ui_->instrumentsBox->currentText() + "/" + textInput;
-    HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
-    connect(worker, &HttpRequestWorker::on_execution_finished,
-            [=](HttpRequestWorker *workerProxy) { goTo(workerProxy, textInput); });
-    worker->execute(input);
-    setLoadScreen(true);
-}
-
 void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
 {
     setLoadScreen(false);
@@ -438,4 +443,55 @@ void MainWindow::selectSimilar()
             ui_->runDataTable->selectionModel()->setCurrentIndex(model_->index(i, TitleColumn),
                                                                  QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
+}
+void MainWindow::on_actionSearch_triggered()
+{
+    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("search runs for:"), QLineEdit::Normal);
+    searchString_ = textInput;
+    foundIndices_.clear();
+    currentFoundIndex_ = 0;
+    if (textInput.isEmpty())
+    {
+        ui_->runDataTable->selectionModel()->clearSelection();
+        statusBar()->clearMessage();
+        return;
+    }
+    // Find all occurences of search string in table elements
+    for (auto i = 0; i < proxyModel_->columnCount(); ++i)
+    {
+        auto location = ui_->runDataTable->horizontalHeader()->logicalIndex(i);
+        if (ui_->runDataTable->isColumnHidden(location) == false)
+            foundIndices_.append(
+                proxyModel_->match(proxyModel_->index(0, location), Qt::DisplayRole, textInput, -1, Qt::MatchContains));
+    }
+    // Select first match
+    if (foundIndices_.size() > 0)
+    {
+        goToCurrentFoundIndex(foundIndices_[0]);
+        statusBar()->showMessage("Find \"" + searchString_ + "\": 1/" + QString::number(foundIndices_.size()) + " Results");
+    }
+    else
+    {
+        ui_->runDataTable->selectionModel()->clearSelection();
+        statusBar()->showMessage("No results");
+    }
+}
+
+void MainWindow::on_actionSelectNext_triggered() { on_findDown_clicked(); }
+void MainWindow::on_actionSelectPrevious_triggered() { on_findUp_clicked(); }
+void MainWindow::on_actionSelectAll_triggered() { on_searchAll_clicked(); }
+
+void MainWindow::on_actionRun_Number_triggered()
+{
+    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("Run No: "), QLineEdit::Normal);
+    if (textInput.isEmpty())
+        return;
+
+    QString url_str = "http://127.0.0.1:5000/getGoToCycle/" + instName_ + "/" + textInput;
+    HttpRequestInput input(url_str);
+    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    connect(worker, &HttpRequestWorker::on_execution_finished,
+            [=](HttpRequestWorker *workerProxy) { goTo(workerProxy, textInput); });
+    worker->execute(input);
+    setLoadScreen(true);
 }

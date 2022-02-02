@@ -50,20 +50,21 @@ void MainWindow::customMenuRequested(QPoint pos)
 
     QString url_str = "http://127.0.0.1:5000/getNexusFields/";
     QString cycle = ui_->cyclesBox->currentText().replace("journal", "cycle").replace(".xml", "");
-    url_str += ui_->instrumentsBox->currentText() + "/" + cycle + "/" + runNos;
+    url_str += instName_ + "/" + cycle + "/" + runNos;
 
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this,
             SLOT(handle_result_contextMenu(HttpRequestWorker *)));
-    setLoadScreen(true);
+    // setLoadScreen(true);
+    contextMenu_->popup(ui_->runDataTable->viewport()->mapToGlobal(pos_));
     worker->execute(input);
 }
 
 // Fills field menu
 void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
 {
-    setLoadScreen(false);
+    // setLoadScreen(false);
     QString msg;
 
     if (worker->error_type == QNetworkReply::NoError)
@@ -99,7 +100,6 @@ void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
         auto *action = new QAction("Select runs with same title", this);
         connect(action, SIGNAL(triggered()), this, SLOT(selectSimilar()));
         contextMenu_->addAction(action);
-        contextMenu_->popup(ui_->runDataTable->viewport()->mapToGlobal(pos_));
     }
     else
     {
@@ -144,7 +144,7 @@ void MainWindow::contextGraph()
     QString url_str = "http://127.0.0.1:5000/getNexusData/";
     QString cycle = ui_->cyclesBox->currentText().replace(0, 7, "cycle").replace(".xml", "");
     QString field = contextAction->data().toString().replace("/", ":");
-    url_str += ui_->instrumentsBox->currentText() + "/" + cycle + "/" + runNos + "/" + field;
+    url_str += instName_ + "/" + cycle + "/" + runNos + "/" + field;
 
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
@@ -169,7 +169,6 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
     {
         auto *timeAxis = new QDateTimeAxis();
         timeAxis->setFormat("yyyy-MM-dd<br>H:mm:ss");
-        timeAxis->setTitleText("Real Time");
         dateTimeChart->addAxis(timeAxis, Qt::AlignBottom);
 
         auto *dateTimeYAxis = new QValueAxis();
@@ -307,7 +306,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         relTimeYAxis->setRange(dateTimeYAxis->min(), dateTimeYAxis->max());
 
         auto *gridLayout = new QGridLayout(window);
-        auto *axisToggleCheck = new QCheckBox("show relative time", window);
+        auto *axisToggleCheck = new QCheckBox("Plot relative to run start times", window);
 
         connect(axisToggleCheck, SIGNAL(stateChanged(int)), this, SLOT(toggleAxis(int)));
 
@@ -322,12 +321,22 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
             if (i < chartFields.size() - 1)
                 tabName += ",";
         }
+        if (!categoryValues.isEmpty())
+        {
+            dateTimeStringAxis->setTitleText(tabName);
+            relTimeStringAxis->setTitleText(tabName);
+        }
+        else
+        {
+            dateTimeYAxis->setTitleText(tabName);
+            relTimeYAxis->setTitleText(tabName);
+        }
         ui_->tabWidget->addTab(window, tabName);
         QString runs;
         for (auto series : dateTimeChart->series())
             runs.append(series->name() + ", ");
         runs.chop(2);
-        QString toolTip = ui_->instrumentsBox->currentText() + "\n" + tabName + "\n" + runs;
+        QString toolTip = instName_ + "\n" + tabName + "\n" + runs;
         ui_->tabWidget->setTabToolTip(ui_->tabWidget->count() - 1, toolTip);
         ui_->tabWidget->setCurrentIndex(ui_->tabWidget->count() - 1);
         dateTimeChartView->setFocus();

@@ -48,6 +48,7 @@ void MainWindow::on_groupButton_clicked(bool checked)
         model_->groupData();
         for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
             ui_->runDataTable->setColumnHidden(i, false);
+        ui_->runDataTable->resizeColumnsToContents();
     }
     else
     {
@@ -60,6 +61,18 @@ void MainWindow::on_groupButton_clicked(bool checked)
             if (it == desiredHeader_.end())
                 ui_->runDataTable->setColumnHidden(i, true);
         }
+        int logIndex;
+        for (auto i = 0; i < desiredHeader_.size(); ++i)
+        {
+            for (auto j = 0; j < ui_->runDataTable->horizontalHeader()->count(); ++j)
+            {
+                logIndex = ui_->runDataTable->horizontalHeader()->logicalIndex(j);
+                if (desiredHeader_[i].first ==
+                    ui_->runDataTable->horizontalHeader()->model()->headerData(logIndex, Qt::Horizontal).toString())
+                    ui_->runDataTable->horizontalHeader()->swapSections(j, i);
+            }
+        }
+        ui_->runDataTable->resizeColumnsToContents();
     }
 }
 

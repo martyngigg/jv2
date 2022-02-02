@@ -102,9 +102,7 @@ void MainWindow::fillInstruments(QList<QPair<QString, QString>> instruments)
     ui_->instrumentsBox->blockSignals(true);
     ui_->instrumentsBox->clear();
     foreach (const auto instrument, instruments)
-    {
         ui_->instrumentsBox->addItem(instrument.first, instrument.second);
-    }
     ui_->instrumentsBox->blockSignals(false);
 }
 
@@ -216,9 +214,9 @@ QList<QPair<QString, QString>> MainWindow::getInstruments()
     return instruments;
 }
 
-QList<QString> MainWindow::getFields(QString instrument, QString instType)
+std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrument, QString instType)
 {
-    QList<QString> desiredInstFields;
+    std::vector<std::pair<QString, QString>> desiredInstFields;
     QDomNodeList desiredInstrumentFields;
 
     QFile file("../extra/tableConfig.xml");
@@ -226,6 +224,8 @@ QList<QString> MainWindow::getFields(QString instrument, QString instType)
     QDomDocument dom;
     dom.setContent(&file);
     file.close();
+
+    std::pair<QString, QString> column;
 
     auto rootelem = dom.documentElement();
     auto instList = rootelem.elementsByTagName("inst");
@@ -252,23 +252,26 @@ QList<QString> MainWindow::getFields(QString instrument, QString instType)
             auto defaultColumns = rootelem.elementsByTagName(instType).item(0).toElement().elementsByTagName("Column");
             for (int i = 0; i < defaultColumns.count(); i++)
             {
-                desiredInstFields.append(
-                    defaultColumns.item(i).toElement().elementsByTagName("Data").item(0).toElement().text());
+                // Get column index and title from xml
+                column.first = defaultColumns.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
+                column.second = defaultColumns.item(i).toElement().attribute("name");
+                desiredInstFields.push_back(column);
             }
             return desiredInstFields;
         }
-
         for (int i = 0; i < configDefaultFields.count(); i++)
         {
-            desiredInstFields.append(
-                configDefaultFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text());
+            column.first = configDefaultFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
+            column.second = configDefaultFields.item(i).toElement().attribute("name");
+            desiredInstFields.push_back(column);
         }
         return desiredInstFields;
     }
     for (int i = 0; i < desiredInstrumentFields.count(); i++)
     {
-        desiredInstFields.append(
-            desiredInstrumentFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text());
+        column.first = desiredInstrumentFields.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
+        column.second = desiredInstrumentFields.item(i).toElement().attribute("name");
+        desiredInstFields.push_back(column);
     }
     return desiredInstFields;
 }

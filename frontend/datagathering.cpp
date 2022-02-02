@@ -64,13 +64,21 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
     if (worker->error_type == QNetworkReply::NoError)
     {
-        // Get keys from json data
+        // Get desired fields and titles from config files
+        desiredHeader_ = getFields(ui_->instrumentsBox->currentText(), ui_->instrumentsBox->currentData().toString());
         auto jsonArray = worker->json_array;
         auto jsonObject = jsonArray.at(0).toObject();
+        // Add columns to header and give titles where applicable
         header_.clear();
         foreach (const QString &key, jsonObject.keys())
         {
-            header_.push_back(JsonTableModel::Heading({{"title", key}, {"index", key}}));
+            // Find matching indices
+            auto it = std::find_if(desiredHeader_.begin(), desiredHeader_.end(),
+                                   [key](const auto &data) { return data.first == key; });
+            if (it != desiredHeader_.end())
+                header_.push_back(JsonTableModel::Heading({{"title", it->second}, {"index", key}}));
+            else
+                header_.push_back(JsonTableModel::Heading({{"title", key}, {"index", key}}));
         }
 
         // Sets and fills table data
@@ -96,23 +104,26 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             viewMenu_->addAction(checkableAction);
             connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));
 
-            desiredHeader_ = getFields(ui_->instrumentsBox->currentText(), ui_->instrumentsBox->currentData().toString());
-
             // Filter table based on desired headers
-            if (desiredHeader_.contains(key))
+            auto it = std::find_if(desiredHeader_.begin(), desiredHeader_.end(),
+                                   [key](const auto &data) { return data.first == key; });
+            // If match found
+            if (it != desiredHeader_.end())
                 checkBox->setCheckState(Qt::Checked);
             else
                 checkBox->setCheckState(Qt::Unchecked);
         }
         int logIndex;
-        for (auto i = 0; i < desiredHeader_.count(); ++i)
+        for (auto i = 0; i < desiredHeader_.size(); ++i)
         {
             for (auto j = 0; j < ui_->runDataTable->horizontalHeader()->count(); ++j)
             {
                 logIndex = ui_->runDataTable->horizontalHeader()->logicalIndex(j);
-                if (desiredHeader_[i] ==
-                    ui_->runDataTable->horizontalHeader()->model()->headerData(logIndex, Qt::Horizontal).toString())
+                // If index matches model data, swap columns in view
+                if (desiredHeader_[i].first == model_->headerData(logIndex, Qt::Horizontal, Qt::UserRole).toString())
+                {
                     ui_->runDataTable->horizontalHeader()->swapSections(j, i);
+                }
             }
         }
         ui_->runDataTable->resizeColumnsToContents();

@@ -35,13 +35,16 @@ JsonTableModel::Header JsonTableModel::getHeader() { return m_header; }
 
 QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    if (role == Qt::UserRole)
+        return m_header[section]["index"]; // Index == database name
+
     if (role != Qt::DisplayRole)
         return QVariant();
 
     switch (orientation)
     {
         case Qt::Horizontal:
-            return m_header[section]["title"];
+            return m_header[section]["title"]; // Title == desired display name
         case Qt::Vertical:
             // return section + 1;
             return QVariant();
@@ -160,3 +163,5 @@ void JsonTableModel::unGroupData()
     setHeader(m_holdHeader);
     setJson(m_holdJson);
 }
+
+void JsonTableModel::setColumnTitle(int section, QString title) { m_header[section]["index"] = title; }

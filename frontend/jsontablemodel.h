@@ -33,6 +33,7 @@ class JsonTableModel : public QAbstractTableModel
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     virtual void groupData();
     virtual void unGroupData();
+    void setColumnTitle(int section, QString title);
 
     private:
     Header m_header;

@@ -9,9 +9,9 @@ void MainWindow::columnHider(int state)
 {
     auto *action = qobject_cast<QCheckBox *>(sender());
 
-    for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
+    for (auto i = 0; i < model_->columnCount(); ++i)
     {
-        if (action->text() == ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString())
+        if (action->text() == model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString())
         {
             switch (state)
             {
@@ -54,11 +54,11 @@ void MainWindow::on_groupButton_clicked(bool checked)
         model_->unGroupData();
         for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
         {
-            if (!desiredHeader_.contains(
-                    ui_->runDataTable->horizontalHeader()->model()->headerData(i, Qt::Horizontal).toString()))
-            {
+            auto index = model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString();
+            auto it = std::find_if(desiredHeader_.begin(), desiredHeader_.end(),
+                                   [index](const auto &data) { return data.first == index; });
+            if (it == desiredHeader_.end())
                 ui_->runDataTable->setColumnHidden(i, true);
-            }
         }
     }
 }

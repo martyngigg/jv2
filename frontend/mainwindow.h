@@ -31,7 +31,7 @@ class MainWindow : public QMainWindow
     void initialiseElements();
     void goToCurrentFoundIndex(QModelIndex index);
     QList<QPair<QString, QString>> getInstruments();
-    QList<QString> getFields(QString instrument, QString instType);
+    std::vector<std::pair<QString, QString>> getFields(QString instrument, QString instType);
     void setLoadScreen(bool state);
     private slots:
     void on_filterBox_textChanged(const QString &arg1);
@@ -82,7 +82,7 @@ class MainWindow : public QMainWindow
     QMenu *findMenu_;
     QMenu *contextMenu_;
     JsonTableModel::Header header_;
-    QList<QString> desiredHeader_;
+    std::vector<std::pair<QString, QString>> desiredHeader_;
     QModelIndexList foundIndices_;
     int currentFoundIndex_;
     bool init_;

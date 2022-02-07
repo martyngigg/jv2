@@ -4,6 +4,7 @@
 #include "chartview.h"
 #include <QApplication>
 #include <QBrush>
+#include <QCategoryAxis>
 #include <QDateTime>
 #include <QDateTimeAxis>
 #include <QDebug>
@@ -147,29 +148,22 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
         // Configure coordinate boundaries to different chart types
         if (chart()->axes(Qt::Horizontal)[0]->type() == QAbstractAxis::AxisTypeValue)
         {
-            QValueAxis *xAxis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Horizontal)[0]);
+            auto *xAxis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Horizontal)[0]);
             maxX = xAxis->max();
             minX = xAxis->min();
         }
         else
         {
-            QDateTimeAxis *xAxis = qobject_cast<QDateTimeAxis *>(chart()->axes(Qt::Horizontal)[0]);
+            auto *xAxis = qobject_cast<QDateTimeAxis *>(chart()->axes(Qt::Horizontal)[0]);
             maxX = xAxis->max().toMSecsSinceEpoch();
             minX = xAxis->min().toMSecsSinceEpoch();
         }
-        if (chart()->axes(Qt::Vertical)[0]->type() == QAbstractAxis::AxisTypeCategory)
-        {
-            maxY = yVal;
-            minY = yVal;
-        }
-        else
-        {
-            QValueAxis *yAxis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Vertical)[0]);
-            maxY = yAxis->max();
-            minY = yAxis->min();
-        }
+        auto *yAxis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Vertical)[0]);
+        maxY = yAxis->max();
+        minY = yAxis->min();
+
         // if mouse in chart boundaries
-        if (xVal <= maxX && xVal >= minX && yVal <= maxY && yVal >= minY)
+        if (xVal <= maxX && xVal >= minX && (yVal <= maxY && yVal >= minY || maxY == 0 && minY == 0))
         {
             // map mouse to axis position
             auto xPosOnAxis = chart()->mapToPosition(QPointF(x, minY));
@@ -206,7 +200,7 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                if (chart()->axes(Qt::Vertical)[0]->type() == QAbstractAxis::AxisTypeCategory)
+                if (maxY == 0 && minY == 0)
                     coordLabelY_->setText("");
                 else
                 {

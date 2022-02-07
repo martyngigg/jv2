@@ -91,26 +91,6 @@
   <inst name="nimrod">
    <location>ndxnimrod</location>
    <type>Neutron</type>
-   <Columns>
-    <Column Title="Run No">
-     <Data>run_number</Data>
-    </Column>
-    <Column Title="Title">
-     <Data>title</Data>
-    </Column>
-    <Column Title="UAmps">
-     <Data>proton_charge</Data>
-    </Column>
-    <Column Title="Start Time">
-     <Data>start_time</Data>
-    </Column>
-    <Column Title="Duration">
-     <Data>duration</Data>
-    </Column>
-    <Column Title="User Name">
-     <Data>user_name</Data>
-    </Column>
-   </Columns>
   </inst>
   <inst name="offspec">
    <location>ndxoffspec</location>

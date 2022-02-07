@@ -27,11 +27,11 @@ class MainWindow : public QMainWindow
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     // Init
-    void fillInstruments(QList<QPair<QString, QString>> instruments);
+    void fillInstruments(QList<std::tuple<QString, QString, QString>> instruments);
     void initialiseElements();
     // Misc
-    void goToCurrentFoundIndex(QModelIndex index);   // Selects given index
-    QList<QPair<QString, QString>> getInstruments(); // Get Instruments from config file
+    void goToCurrentFoundIndex(QModelIndex index);                 // Selects given index
+    QList<std::tuple<QString, QString, QString>> getInstruments(); // Get Instruments from config file
     std::vector<std::pair<QString, QString>> getFields(QString instrument, QString instType); // Get Fields from config file
     void setLoadScreen(bool state);
     private slots:
@@ -60,9 +60,9 @@ class MainWindow : public QMainWindow
     void handle_result_instruments(HttpRequestWorker *worker);
     void handle_result_cycles(HttpRequestWorker *worker);
     void currentInstrumentChanged(const QString &arg1);
-    void on_cyclesBox_currentTextChanged(const QString &arg1);
+    void on_cyclesBox_currentIndexChanged(int index);
     void recentCycle();
-    void changeInst(QPair<QString, QString> instrument);
+    void changeInst(std::tuple<QString, QString, QString> instrument);
     // Grouping
     void on_groupButton_clicked(bool checked);
     // Visualisation
@@ -104,6 +104,7 @@ class MainWindow : public QMainWindow
     QString searchString_;
     QString instType_;
     QString instName_;
+    QString instDisplayName_;
     // Misc
     bool init_;
     QPoint pos_;

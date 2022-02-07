@@ -3,146 +3,182 @@
 	<inst name="alf">
 		<location>ndxalf</location>
 		<type>Neutron</type>
+		<displayName>ALF</displayName>
 	</inst>
 	<inst name="argus">
 		<location>ndxargus</location>
 		<type>Muon</type>
+		<displayName>ARGUS</displayName>
 	</inst>
 	<inst name="chipir">
 		<location>ndxchipir</location>
 		<type>Neutron</type>
+		<displayName>ChipIr</displayName>
 	</inst>
 	<inst name="chronus">
 		<location>ndxchronus</location>
 		<type>Neutron</type>
+		<displayName>CHRONUS</displayName>
 	</inst>
 	<inst name="crisp">
 		<location>ndxcrisp</location>
 		<type>Neutron</type>
+		<displayName>CRISP</displayName>
 	</inst>
 	<inst name="emma">
 		<location>ndxemma</location>
 		<type>Neutron</type>
+		<displayName>EMMA</displayName>
 	</inst>
 	<inst name="emu">
 		<location>ndxemu</location>
 		<type>Muon</type>
+		<displayName>EMU</displayName>
 	</inst>
 	<inst name="enginx">
 		<location>ndxenginx</location>
 		<type>Neutron</type>
+		<displayName>ENGINX</displayName>
 	</inst>
 	<inst name="gem">
 		<location>ndxgem</location>
 		<type>Neutron</type>
+		<displayName>GEM</displayName>
 	</inst>
 	<inst name="het">
 		<location>ndxenginx</location>
 		<type>Neutron</type>
+		<displayName>HET</displayName>
 	</inst>
 	<inst name="hifi">
 		<location>ndxhifi</location>
 		<type>Muon</type>
+		<displayName>HIFI</displayName>
 	</inst>
 	<inst name="hrpd">
 		<location>ndxhrpd</location>
 		<type>Neutron</type>
+		<displayName>HRPD</displayName>
 	</inst>
 	<inst name="imat">
 		<location>ndximat</location>
 		<type>Neutron</type>
+		<displayName>IMAT</displayName>
 	</inst>
 	<inst name="ines">
 		<location>ndxines</location>
 		<type>Neutron</type>
+		<displayName>INES</displayName>
 	</inst>
 	<inst name="inter">
 		<location>ndxinter</location>
 		<type>Neutron</type>
+		<displayName>INTER</displayName>
 	</inst>
 	<inst name="iris">
 		<location>ndxiris</location>
 		<type>Neutron</type>
+		<displayName>IRIS</displayName>
 	</inst>
 	<inst name="let">
 		<location>ndxlet</location>
 		<type>Neutron</type>
+		<displayName>LET</displayName>
 	</inst>
 	<inst name="loq">
 		<location>ndxloq</location>
 		<type>Neutron</type>
+		<displayName>LOQ</displayName>
 	</inst>
 	<inst name="maps">
 		<location>ndxmaps</location>
 		<type>Neutron</type>
+		<displayName>MAPS</displayName>
 	</inst>
 	<inst name="mari">
 		<location>ndxmari</location>
 		<type>Neutron</type>
+		<displayName>MARI</displayName>
 	</inst>
 	<inst name="merlin">
 		<location>ndxmerlin</location>
 		<type>Neutron</type>
+		<displayName>MERLIN</displayName>
 	</inst>
 	<inst name="musr">
 		<location>ndxmusr</location>
 		<type>Muon</type>
+		<displayName>MUSR</displayName>
 	</inst>
 	<inst name="nimrod">
 		<location>ndxnimrod</location>
 		<type>Neutron</type>
+		<displayName>NIMROD</displayName>
 	</inst>
 	<inst name="offspec">
 		<location>ndxoffspec</location>
 		<type>Neutron</type>
+		<displayName>OFFSPEC</displayName>
 	</inst>
 	<inst name="osiris">
 		<location>ndxosiris</location>
 		<type>Neutron</type>
+		<displayName>OSIRIS</displayName>
 	</inst>
 	<inst name="pearl">
 		<location>ndxpearl</location>
 		<type>Neutron</type>
+		<displayName>PEARL</displayName>
 	</inst>
 	<inst name="polaris">
 		<location>ndxpolaris</location>
 		<type>Neutron</type>
+		<displayName>POLARIS</displayName>
 	</inst>
 	<inst name="polref">
 		<location>ndxpolref</location>
 		<type>Neutron</type>
+		<displayName>POLREF</displayName>
 	</inst>
 	<inst name="sandals">
 		<location>ndxsandals</location>
 		<type>Neutron</type>
+		<displayName>SANDALS</displayName>
 	</inst>
 	<inst name="sans2d">
 		<location>ndxsans2d</location>
 		<type>Neutron</type>
+		<displayName>SANS2d</displayName>
 	</inst>
 	<inst name="surf">
 		<location>ndxsurf</location>
 		<type>Neutron</type>
+		<displayName>SURF</displayName>
 	</inst>
 	<inst name="sxd">
 		<location>ndxsxd</location>
 		<type>Neutron</type>
+		<displayName>SXD</displayName>
 	</inst>
 	<inst name="tosca">
 		<location>ndxtosca</location>
 		<type>Neutron</type>
+		<displayName>TOSCA</displayName>
 	</inst>
 	<inst name="vesuvio">
 		<location>ndxevs</location>
 		<type>Neutron</type>
+		<displayName>VESUVIO</displayName>
 	</inst>
 	<inst name="wish">
 		<location>ndxwish</location>
 		<type>Neutron</type>
+		<displayName>WISH</displayName>
 	</inst>
 	<inst name="zoom">
 		<location>ndxzoom</location>
 		<type>Neutron</type>
+		<displayName>ZOOM</displayName>
 	</inst>
 </insts>
 <jv2Fields>

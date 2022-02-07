@@ -81,6 +81,31 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
 
                 if (v.isString())
                 {
+                    // if title = Run Numbers then format
+                    if (m_header[index.column()]["title"] == "Run Numbers")
+                    {
+                        // Format grouped runs display
+                        auto runArr = v.toString().split(";");
+                        if (runArr.size() == 1)
+                            return runArr[0];
+                        QString displayString = runArr[0];
+                        for (auto i = 1; i < runArr.size(); i++)
+                            if (runArr[i].toInt() == runArr[i - 1].toInt() + 1)
+                                displayString += "-" + runArr[i];
+                            else
+                                displayString += "," + runArr[i];
+                        QStringList splitDisplay;
+                        foreach (const auto &string, displayString.split(","))
+                        {
+                            if (string.contains("-"))
+                                splitDisplay.append(string.left(string.indexOf("-") + 1) +
+                                                    string.right(string.size() - string.lastIndexOf("-") - 1));
+                            else
+                                splitDisplay.append(string);
+                        }
+
+                        return splitDisplay.join(",");
+                    }
                     // if title = duration then format
                     if (m_header[index.column()]["index"] == "duration")
                     {
@@ -93,6 +118,16 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
                         return QString(QString::number(hours).rightJustified(2, '0') + ":" +
                                        QString::number(minutes).rightJustified(2, '0') + ":" +
                                        QString::number(seconds).rightJustified(2, '0'));
+                    }
+                    if (QDateTime::fromString(v.toString(), "yyyy-MM-dd'T'HH:mm:ss").isValid())
+                    {
+                        QDateTime time = QDateTime::fromString(v.toString(), "yyyy-MM-dd'T'HH:mm:ss");
+                        if (time.toString("dd/MM/yyyy") == QDateTime::currentDateTime().toString("dd/MM/yyyy"))
+                            return QString("Today at: ").append(time.toString("dd/MM/yyyy HH:mm:ss"));
+                        else if (time.addDays(-1).toString("dd/MM/yyyy") == QDateTime::currentDateTime().toString("dd/MM/yyyy"))
+                            return QString("Yesterday at: ").append(time.toString("dd/MM/yyyy HH:mm:ss"));
+                        else
+                            return time.toString("dd/MM/yyyy HH:mm:ss");
                     }
                     return v.toString();
                 }

@@ -28,7 +28,11 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
         {
             // removes header_ file
             if (value.toString() != "journal.xml")
-                ui_->cyclesBox->addItem(value.toString());
+            {
+                auto displayName =
+                    "Cycle " + value.toString().split("_")[1] + "/" + value.toString().split("_")[2].remove(".xml");
+                ui_->cyclesBox->addItem(displayName, value.toString());
+            }
         }
         ui_->cyclesBox->blockSignals(false);
 
@@ -157,28 +161,29 @@ void MainWindow::currentInstrumentChanged(const QString &arg1)
 }
 
 // Populate table with cycle data
-void MainWindow::on_cyclesBox_currentTextChanged(const QString &arg1)
+void MainWindow::on_cyclesBox_currentIndexChanged(int index)
 {
     // Handle possible undesired calls
-    ui_->cyclesBox->setDisabled(arg1.isEmpty());
-    ui_->filterBox->setDisabled(arg1.isEmpty());
-    if (arg1.isEmpty())
+    auto currentText = ui_->cyclesBox->itemText(index);
+    ui_->cyclesBox->setDisabled(currentText.isEmpty());
+    ui_->filterBox->setDisabled(currentText.isEmpty());
+    if (currentText.isEmpty())
         return;
 
-    if (arg1[0] == '[')
+    if (currentText[0] == '[')
     {
-        for (auto tuple : cachedMassSearch_)
+        auto it = std::find_if(cachedMassSearch_.begin(), cachedMassSearch_.end(), [currentText](const auto &tuple) {
+            return std::get<1>(tuple) == currentText.mid(1, currentText.length() - 2);
+        });
+        if (it != cachedMassSearch_.end())
         {
-            if (std::get<1>(tuple) == arg1.mid(1, arg1.length() - 2))
-            {
-                setLoadScreen(true);
-                handle_result_cycles(std::get<0>(tuple));
-            }
+            setLoadScreen(true);
+            handle_result_cycles(std::get<0>(*it));
         }
         return;
     }
 
-    QString url_str = "http://127.0.0.1:5000/getJournal/" + instName_ + "/" + arg1;
+    QString url_str = "http://127.0.0.1:5000/getJournal/" + instName_ + "/" + ui_->cyclesBox->itemData(index).toString();
     HttpRequestInput input(url_str);
     HttpRequestWorker *worker = new HttpRequestWorker(this);
 

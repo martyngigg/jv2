@@ -7,6 +7,7 @@
 #include <QChart>
 #include <QChartView>
 #include <QCheckBox>
+#include <QDateTime>
 #include <QDebug>
 #include <QDomDocument>
 #include <QInputDialog>
@@ -91,7 +92,10 @@ void MainWindow::recentCycle()
     if (instName_ != "")
     {
         if (cycleIndex != -1)
+        {
             ui_->cyclesBox->setCurrentIndex(cycleIndex);
+            on_cyclesBox_currentIndexChanged(cycleIndex);
+        }
         else
             ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
     }
@@ -100,7 +104,7 @@ void MainWindow::recentCycle()
 }
 
 // Fill instrument list
-void MainWindow::fillInstruments(QList<QPair<QString, QString>> instruments)
+void MainWindow::fillInstruments(QList<std::tuple<QString, QString, QString>> instruments)
 {
     // Only allow calls after initial population
     instrumentsMenu_ = new QMenu("test");
@@ -108,25 +112,26 @@ void MainWindow::fillInstruments(QList<QPair<QString, QString>> instruments)
             [=]() { instrumentsMenu_->exec(ui_->instrumentButton->mapToGlobal(QPoint(0, ui_->instrumentButton->height()))); });
     foreach (const auto instrument, instruments)
     {
-        auto *action = new QAction(instrument.first, this);
+        auto *action = new QAction(std::get<2>(instrument), this);
         connect(action, &QAction::triggered, [=]() { changeInst(instrument); });
         instrumentsMenu_->addAction(action);
     }
 }
 
 // Handle Instrument selection
-void MainWindow::changeInst(QPair<QString, QString> instrument)
+void MainWindow::changeInst(std::tuple<QString, QString, QString> instrument)
 {
-    ui_->instrumentButton->setText(instrument.first.toUpper());
-    currentInstrumentChanged(instrument.first);
-    instType_ = instrument.second;
-    instName_ = instrument.first;
+    instType_ = std::get<1>(instrument);
+    instName_ = std::get<0>(instrument);
+    instDisplayName_ = std::get<2>(instrument);
+    ui_->instrumentButton->setText(instDisplayName_);
+    currentInstrumentChanged(instName_);
 }
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Update history on close
     QSettings settings;
-    settings.setValue("recentInstrument", instName_.toLower());
+    settings.setValue("recentInstrument", instDisplayName_);
     settings.setValue("recentCycle", ui_->cyclesBox->currentText());
 
     // Close server
@@ -140,8 +145,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::massSearch(QString name, QString value)
 {
-    QString textInput =
-        QInputDialog::getText(this, tr("Enter search query"), tr(name.append(": ").toUtf8()), QLineEdit::Normal);
+    QString textInput = QInputDialog::getText(this, tr("Find"), tr(name.append(": ").toUtf8()), QLineEdit::Normal);
     QString text = name.append(textInput);
     if (textInput.isEmpty())
         return;
@@ -164,7 +168,7 @@ void MainWindow::massSearch(QString name, QString value)
     worker->execute(input);
 
     cachedMassSearch_.append(std::make_tuple(worker, text));
-    ui_->cyclesBox->addItem("[" + text + "]");
+    ui_->cyclesBox->addItem("[" + text + "]", text);
     ui_->cyclesBox->setCurrentText("[" + text + "]");
     setLoadScreen(true);
 }
@@ -187,7 +191,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 }
 
 // Get instrument data from config file
-QList<QPair<QString, QString>> MainWindow::getInstruments()
+QList<std::tuple<QString, QString, QString>> MainWindow::getInstruments()
 {
     QFile file("../extra/instrumentData.xml");
     file.open(QIODevice::ReadOnly);
@@ -197,17 +201,18 @@ QList<QPair<QString, QString>> MainWindow::getInstruments()
     auto rootelem = dom.documentElement();
     auto nodelist = rootelem.elementsByTagName("inst");
 
-    QList<QPair<QString, QString>> instruments;
-    QPair<QString, QString> instrument;
+    QList<std::tuple<QString, QString, QString>> instruments;
+    std::tuple<QString, QString, QString> instrument;
     QDomNode node;
     QDomElement elem;
     for (auto i = 0; i < nodelist.count(); i++)
     {
         node = nodelist.item(i);
         elem = node.toElement();
-        instrument.first = elem.attribute("name");
-        instrument.second = elem.elementsByTagName("type").item(0).toElement().text();
-        instruments.append(instrument);
+        auto instrumentDisplayName = elem.elementsByTagName("displayName").item(0).toElement().text();
+        auto instrumentType = elem.elementsByTagName("type").item(0).toElement().text();
+        auto instrumentName = elem.attribute("name");
+        instruments.append(std::make_tuple(instrumentName, instrumentType, instrumentDisplayName));
     }
     return instruments;
 }
@@ -324,7 +329,7 @@ void MainWindow::savePref()
             {
                 auto preferredFieldsElem = dom.createElement("Column");
                 auto preferredFieldsDataElem = dom.createElement("Data");
-                preferredFieldsElem.setAttribute("Title", field.split(",")[1]);
+                preferredFieldsElem.setAttribute("name", field.split(",")[1]);
                 preferredFieldsDataElem.appendChild(dom.createTextNode(field.split(",")[0]));
                 preferredFieldsElem.appendChild(preferredFieldsDataElem);
                 columns.appendChild(preferredFieldsElem);

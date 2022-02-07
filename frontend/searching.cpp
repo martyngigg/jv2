@@ -47,7 +47,7 @@ void MainWindow::findUp()
         if (currentFoundIndex_ >= 1)
             currentFoundIndex_ -= 1;
         else
-            currentFoundIndex_ = 0;
+            currentFoundIndex_ = foundIndices_.size() - 1;
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
         statusBar()->showMessage("Find \"" + searchString_ + "\": " + QString::number(currentFoundIndex_ + 1) + "/" +
                                  QString::number(foundIndices_.size()) + " Results");
@@ -60,8 +60,7 @@ void MainWindow::findDown()
     // Boundary/ error handling
     if (foundIndices_.size() > 0)
     {
-        if (currentFoundIndex_ < foundIndices_.size() - 1)
-            currentFoundIndex_ += 1;
+        currentFoundIndex_ = ++currentFoundIndex_ % foundIndices_.size();
         goToCurrentFoundIndex(foundIndices_[currentFoundIndex_]);
         statusBar()->showMessage("Find \"" + searchString_ + "\": " + QString::number(currentFoundIndex_ + 1) + "/" +
                                  QString::number(foundIndices_.size()) + " Results");
@@ -121,7 +120,8 @@ void MainWindow::selectSimilar()
 }
 void MainWindow::on_actionSearch_triggered()
 {
-    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("search runs for:"), QLineEdit::Normal);
+    QString textInput =
+        QInputDialog::getText(this, tr("Find"), tr("Find in current run data (RB, user, title,...):"), QLineEdit::Normal);
     searchString_ = textInput;
     foundIndices_.clear();
     currentFoundIndex_ = 0;

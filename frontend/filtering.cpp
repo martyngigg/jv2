@@ -117,13 +117,17 @@ void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
             return;
         }
 
-        if (ui_->cyclesBox->currentText() == worker->response)
+        if (ui_->cyclesBox->currentData().toString() == worker->response)
         {
             selectIndex(runNumber);
             return;
         }
         connect(this, &MainWindow::tableFilled, [=]() { selectIndex(runNumber); });
-        ui_->cyclesBox->setCurrentText(worker->response);
+        for (auto i = 0; i < ui_->cyclesBox->count(); i++)
+        {
+            if (ui_->cyclesBox->itemData(i).toString() == worker->response)
+                ui_->cyclesBox->setCurrentIndex(i);
+        }
     }
     else
     {
@@ -136,7 +140,7 @@ void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
 // Go-To run number
 void MainWindow::on_actionRun_Number_triggered()
 {
-    QString textInput = QInputDialog::getText(this, tr("Enter search query"), tr("Run No: "), QLineEdit::Normal);
+    QString textInput = QInputDialog::getText(this, tr("Find"), tr("Run No: "), QLineEdit::Normal);
     if (textInput.isEmpty())
         return;
 

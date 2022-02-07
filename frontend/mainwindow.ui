@@ -252,7 +252,7 @@
    </widget>
    <widget class="QMenu" name="menuFind">
     <property name="title">
-     <string>Find</string>
+     <string>Search</string>
     </property>
     <widget class="QMenu" name="menuSearch_across_cycles">
      <property name="title">

@@ -67,7 +67,8 @@ void MainWindow::customMenuRequested(QPoint pos)
     runNos.chop(1);
 
     QString url_str = "http://127.0.0.1:5000/getNexusFields/";
-    QString cycle = ui_->cyclesBox->currentData().toString().replace("journal", "cycle").replace(".xml", "");
+    QString cycle = cyclesMap_[ui_->cycleButton->text()];
+    cycle.replace(0, 7, "cycle").replace(".xml", "");
     url_str += instName_ + "/" + cycle + "/" + runNos;
 
     HttpRequestInput input(url_str);
@@ -177,7 +178,8 @@ void MainWindow::contextGraph()
     if (runNos.size() == 0)
         return;
     QString url_str = "http://127.0.0.1:5000/getNexusData/";
-    QString cycle = ui_->cyclesBox->currentData().toString().replace(0, 7, "cycle").replace(".xml", "");
+    QString cycle = cyclesMap_[ui_->cycleButton->text()];
+    cycle.replace(0, 7, "cycle").replace(".xml", "");
     QString field = contextAction->data().toString().replace("/", ":");
     url_str += instName_ + "/" + cycle + "/" + runNos + "/" + field;
 
@@ -251,13 +253,17 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                 auto *dateSeries = new QLineSeries();
                 auto *relSeries = new QLineSeries();
 
-                connect(dateSeries, SIGNAL(hovered(const QPointF, bool)), dateTimeChartView,
-                        SLOT(setHovered(const QPointF, bool)));
-                connect(dateTimeChartView, SIGNAL(showCoordinates(qreal, qreal)), this, SLOT(showStatus(qreal, qreal)));
+                connect(dateSeries, &QLineSeries::hovered, [=](const QPointF point, bool hovered) {
+                    dateTimeChartView->setHovered(point, hovered, dateSeries->name());
+                });
+                connect(dateTimeChartView, SIGNAL(showCoordinates(qreal, qreal, QString)), this,
+                        SLOT(showStatus(qreal, qreal, QString)));
                 connect(dateTimeChartView, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
-                connect(relSeries, SIGNAL(hovered(const QPointF, bool)), relTimeChartView,
-                        SLOT(setHovered(const QPointF, bool)));
-                connect(relTimeChartView, SIGNAL(showCoordinates(qreal, qreal)), this, SLOT(showStatus(qreal, qreal)));
+                connect(relSeries, &QLineSeries::hovered, [=](const QPointF point, bool hovered) {
+                    relTimeChartView->setHovered(point, hovered, relSeries->name());
+                });
+                connect(relTimeChartView, SIGNAL(showCoordinates(qreal, qreal, QString)), this,
+                        SLOT(showStatus(qreal, qreal, QString)));
                 connect(relTimeChartView, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
 
                 // Set dateSeries ID
@@ -405,17 +411,13 @@ void MainWindow::toggleAxis(int state)
     }
 }
 
-void MainWindow::showStatus(qreal x, qreal y)
+void MainWindow::showStatus(qreal x, qreal y, QString title)
 {
+    QString message;
     auto *chartView = qobject_cast<ChartView *>(sender());
     if (QString(chartView->chart()->axes(Qt::Horizontal)[0]->metaObject()->className()) == QString("QDateTimeAxis"))
-    {
-        QString message = QDateTime::fromMSecsSinceEpoch(x).toString("yyyy-MM-dd HH:mm:ss") + ", " + QString::number(y);
-        statusBar()->showMessage(message);
-    }
+        message = QDateTime::fromMSecsSinceEpoch(x).toString("yyyy-MM-dd HH:mm:ss") + ", " + QString::number(y);
     else
-    {
-        QString message = QString::number(x) + ", " + QString::number(y);
-        statusBar()->showMessage(message);
-    }
+        message = QString::number(x) + ", " + QString::number(y);
+    statusBar()->showMessage("Run " + title + ": " + message);
 }

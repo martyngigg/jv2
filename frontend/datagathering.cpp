@@ -20,10 +20,8 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
     {
         auto response = worker->response;
 
-        // Prevents unwanted firing
-        ui_->cyclesBox->blockSignals(true);
-        QString cycleText = ui_->cyclesBox->currentText();
-        ui_->cyclesBox->clear();
+        cyclesMenu_->clear();
+        cyclesMap_.clear();
         foreach (const QJsonValue &value, worker->json_array)
         {
             // removes header_ file
@@ -31,32 +29,37 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
             {
                 auto displayName =
                     "Cycle " + value.toString().split("_")[1] + "/" + value.toString().split("_")[2].remove(".xml");
-                ui_->cyclesBox->addItem(displayName, value.toString());
+                cyclesMap_[displayName] = value.toString();
+
+                auto *action = new QAction(displayName, this);
+                connect(action, &QAction::triggered, [=]() { changeCycle(displayName); });
+                cyclesMenu_->addAction(action);
             }
         }
-        ui_->cyclesBox->blockSignals(false);
 
-        // Keep cycle over instruments
-        auto cycleIndex = ui_->cyclesBox->findText(cycleText);
-        if (!init_)
+        if (init_)
         {
-            if (cycleIndex != -1)
-                ui_->cyclesBox->setCurrentIndex(cycleIndex);
-            else
-                ui_->cyclesBox->setCurrentIndex(ui_->cyclesBox->count() - 1);
+            // Sets cycle to most recently viewed
+            recentCycle();
+            init_ = false;
+            return;
         }
+        // Keep cycle over instruments
+        for (QAction *action : cyclesMenu_->actions())
+        {
+            if (action->text() == ui_->cycleButton->text())
+            {
+                action->trigger();
+                return;
+            }
+        }
+        cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->trigger();
     }
     else
     {
         // an error occurred
         msg = "Error1: " + worker->error_str;
         QMessageBox::information(this, "", msg);
-    }
-    if (init_)
-    {
-        // Sets cycle to most recently viewed
-        recentCycle();
-        init_ = false;
     }
 }
 
@@ -68,6 +71,10 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
     if (worker->error_type == QNetworkReply::NoError)
     {
+        // Error handling
+        if (ui_->groupButton->isChecked())
+            ui_->groupButton->setChecked(false);
+
         // Get desired fields and titles from config files
         desiredHeader_ = getFields(instName_, instType_);
         auto jsonArray = worker->json_array;
@@ -161,29 +168,23 @@ void MainWindow::currentInstrumentChanged(const QString &arg1)
 }
 
 // Populate table with cycle data
-void MainWindow::on_cyclesBox_currentIndexChanged(int index)
+void MainWindow::changeCycle(QString value)
 {
-    // Handle possible undesired calls
-    auto currentText = ui_->cyclesBox->itemText(index);
-    ui_->cyclesBox->setDisabled(currentText.isEmpty());
-    ui_->filterBox->setDisabled(currentText.isEmpty());
-    if (currentText.isEmpty())
-        return;
-
-    if (currentText[0] == '[')
+    if (value[0] == '[')
     {
-        auto it = std::find_if(cachedMassSearch_.begin(), cachedMassSearch_.end(), [currentText](const auto &tuple) {
-            return std::get<1>(tuple) == currentText.mid(1, currentText.length() - 2);
-        });
+        auto it = std::find_if(cachedMassSearch_.begin(), cachedMassSearch_.end(),
+                               [value](const auto &tuple) { return std::get<1>(tuple) == value.mid(1, value.length() - 2); });
         if (it != cachedMassSearch_.end())
         {
+            ui_->cycleButton->setText(value);
             setLoadScreen(true);
             handle_result_cycles(std::get<0>(*it));
         }
         return;
     }
+    ui_->cycleButton->setText(value);
 
-    QString url_str = "http://127.0.0.1:5000/getJournal/" + instName_ + "/" + ui_->cyclesBox->itemData(index).toString();
+    QString url_str = "http://127.0.0.1:5000/getJournal/" + instName_ + "/" + cyclesMap_[value];
     HttpRequestInput input(url_str);
     HttpRequestWorker *worker = new HttpRequestWorker(this);
 

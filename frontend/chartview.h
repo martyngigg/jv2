@@ -15,10 +15,10 @@ class ChartView : public QChartView
     ChartView(QChart *chart, QWidget *parent = 0);
 
     public slots:
-    void setHovered(const QPointF point, bool hovered);
+    void setHovered(const QPointF point, bool hovered, QString title);
 
     signals:
-    void showCoordinates(qreal x, qreal y);
+    void showCoordinates(qreal x, qreal y, QString title);
     void clearCoordinates();
 
     protected:
@@ -31,7 +31,7 @@ class ChartView : public QChartView
 
     private:
     QPointF lastMousePos_;
-    bool hovered_;
+    QString hovered_;
     QGraphicsSimpleTextItem *coordLabelX_;
     QGraphicsSimpleTextItem *coordLabelY_;
     QGraphicsSimpleTextItem *coordStartLabelX_;

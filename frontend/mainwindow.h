@@ -60,7 +60,7 @@ class MainWindow : public QMainWindow
     void handle_result_instruments(HttpRequestWorker *worker);
     void handle_result_cycles(HttpRequestWorker *worker);
     void currentInstrumentChanged(const QString &arg1);
-    void on_cyclesBox_currentIndexChanged(int index);
+    void changeCycle(QString value);
     void recentCycle();
     void changeInst(std::tuple<QString, QString, QString> instrument);
     // Grouping
@@ -71,7 +71,7 @@ class MainWindow : public QMainWindow
     void contextGraph();
     void handle_result_contextMenu(HttpRequestWorker *worker);
     void toggleAxis(int state);
-    void showStatus(qreal x, qreal y);
+    void showStatus(qreal x, qreal y, QString title);
     // Misc Interface Functions
     void removeTab(int index);
     void savePref();
@@ -97,6 +97,7 @@ class MainWindow : public QMainWindow
     QMenu *findMenu_;
     QMenu *contextMenu_;
     QMenu *instrumentsMenu_;
+    QMenu *cyclesMenu_;
 
     QModelIndexList foundIndices_;
     int currentFoundIndex_;
@@ -105,6 +106,7 @@ class MainWindow : public QMainWindow
     QString instType_;
     QString instName_;
     QString instDisplayName_;
+    QMap<QString, QString> cyclesMap_;
     // Misc
     bool init_;
     QPoint pos_;

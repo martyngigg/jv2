@@ -95,7 +95,7 @@ void MainWindow::selectIndex(QString runNumber)
     ui_->runDataTable->selectionModel()->clearSelection();
 
     updateSearch(runNumber);
-    statusBar()->showMessage("Found run " + runNumber + " in " + ui_->cyclesBox->currentText(), 5000);
+    statusBar()->showMessage("Found run " + runNumber + " in " + ui_->cycleButton->text(), 5000);
     disconnect(this, &MainWindow::tableFilled, nullptr, nullptr);
 }
 

@@ -18,7 +18,7 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QChartView(chart, parent)
     setRubberBand(QChartView::HorizontalRubberBand);
     setDragMode(QGraphicsView::NoDrag);
     this->setMouseTracking(true);
-    hovered_ = false;
+    hovered_ = "";
     coordLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
     coordLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
     coordStartLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
@@ -118,7 +118,7 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
 }
 
 // Set value for hover behaviour
-void ChartView::setHovered(const QPointF point, bool hovered) { hovered_ = hovered; }
+void ChartView::setHovered(const QPointF point, bool hovered, QString title) { hovered_ = hovered ? title : ""; }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
@@ -213,8 +213,8 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        if (hovered_)
-            emit showCoordinates(chart()->mapToValue(event->pos()).x(), chart()->mapToValue(event->pos()).y());
+        if (!hovered_.isEmpty())
+            emit showCoordinates(chart()->mapToValue(event->pos()).x(), chart()->mapToValue(event->pos()).y(), hovered_);
         else
             emit clearCoordinates();
     }

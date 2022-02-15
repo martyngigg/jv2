@@ -40,7 +40,8 @@ void MainWindow::on_filterBox_textChanged(const QString &arg1)
     proxyModel_->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
     // Update search to new data
-    updateSearch(searchString_);
+    if (searchString_ != "")
+        updateSearch(searchString_);
 }
 
 // Groups table data
@@ -95,13 +96,15 @@ void MainWindow::on_actionMassSearchUser_triggered() { massSearch("User name", "
 void MainWindow::on_actionClear_cached_searches_triggered()
 {
     cachedMassSearch_.clear();
-    for (auto i = ui_->cyclesBox->count() - 1; i >= 0; i--)
+    for (auto i = cyclesMenu_->actions().count() - 1; i >= 0; i--)
     {
-        if (ui_->cyclesBox->itemText(i)[0] == '[')
+        if (cyclesMenu_->actions()[i]->text()[0] == '[')
         {
-            ui_->cyclesBox->removeItem(i);
+            cyclesMenu_->removeAction(cyclesMenu_->actions()[i]);
         }
     }
+    if (ui_->cycleButton->text()[0] == '[')
+        cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->trigger();
 }
 
 void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
@@ -116,17 +119,16 @@ void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
             statusBar()->showMessage("Search query not found", 5000);
             return;
         }
-
-        if (ui_->cyclesBox->currentData().toString() == worker->response)
+        if (cyclesMap_[ui_->cycleButton->text()] == worker->response)
         {
             selectIndex(runNumber);
             return;
         }
         connect(this, &MainWindow::tableFilled, [=]() { selectIndex(runNumber); });
-        for (auto i = 0; i < ui_->cyclesBox->count(); i++)
+        for (auto i = 0; i < cyclesMenu_->actions().count(); i++)
         {
-            if (ui_->cyclesBox->itemData(i).toString() == worker->response)
-                ui_->cyclesBox->setCurrentIndex(i);
+            if (cyclesMap_[cyclesMenu_->actions()[i]->text()] == worker->response)
+                changeCycle(cyclesMenu_->actions()[i]->text());
         }
     }
     else

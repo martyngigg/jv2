@@ -102,8 +102,9 @@ void MainWindow::recentCycle()
 void MainWindow::fillInstruments(QList<std::tuple<QString, QString, QString>> instruments)
 {
     // Only allow calls after initial population
-    instrumentsMenu_ = new QMenu("test");
-    cyclesMenu_ = new QMenu("test2");
+    instrumentsMenu_ = new QMenu("instrumentsMenu");
+    cyclesMenu_ = new QMenu("cyclesMenu");
+
     connect(ui_->instrumentButton, &QPushButton::clicked,
             [=]() { instrumentsMenu_->exec(ui_->instrumentButton->mapToGlobal(QPoint(0, ui_->instrumentButton->height()))); });
     connect(ui_->cycleButton, &QPushButton::clicked,
@@ -191,7 +192,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         updateSearch(searchString_);
         return;
     }
-    event->accept();
 }
 
 // Get instrument data from config file

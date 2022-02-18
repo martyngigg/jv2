@@ -180,21 +180,17 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
 
         auto *dateTimeYAxis = new QValueAxis();
         dateTimeYAxis->setRange(0, 0);
-        dateTimeChart->addAxis(dateTimeYAxis, Qt::AlignLeft);
 
         auto *dateTimeStringAxis = new QCategoryAxis();
         QStringList categoryValues;
-        dateTimeChart->addAxis(dateTimeStringAxis, Qt::AlignLeft);
 
         auto *relTimeXAxis = new QValueAxis();
         relTimeXAxis->setTitleText("Relative Time (s)");
         relTimeChart->addAxis(relTimeXAxis, Qt::AlignBottom);
 
         auto *relTimeYAxis = new QValueAxis();
-        relTimeChart->addAxis(relTimeYAxis, Qt::AlignLeft);
 
         auto *relTimeStringAxis = new QCategoryAxis();
-        relTimeChart->addAxis(relTimeStringAxis, Qt::AlignLeft);
 
         QList<QString> chartFields;
         bool firstRun = true;
@@ -211,9 +207,40 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
             {
                 timeAxis->setRange(startTime, endTime);
                 relTimeXAxis->setRange(0, 0);
-                firstRun = false;
             }
 
+            foreach (const auto &fieldData, runFieldsArray)
+            {
+                auto fieldDataArray = fieldData.toArray();
+                fieldDataArray.removeFirst();
+                if (!fieldDataArray.first()[1].isString())
+                    break;
+                foreach (const auto &dataPair, fieldDataArray)
+                {
+                    auto dataPairArray = dataPair.toArray();
+                    categoryValues.append(dataPairArray[1].toString());
+                }
+            }
+
+            if (!categoryValues.isEmpty())
+            {
+                categoryValues.removeDuplicates();
+                categoryValues.sort();
+            }
+            if (firstRun)
+            {
+                if (!categoryValues.isEmpty())
+                {
+                    dateTimeChart->addAxis(dateTimeStringAxis, Qt::AlignLeft);
+                    relTimeChart->addAxis(relTimeStringAxis, Qt::AlignLeft);
+                }
+                else
+                {
+                    dateTimeChart->addAxis(dateTimeYAxis, Qt::AlignLeft);
+                    relTimeChart->addAxis(relTimeYAxis, Qt::AlignLeft);
+                }
+                firstRun = false;
+            }
             // For each field
             foreach (const auto &fieldData, runFieldsArray)
             {
@@ -250,10 +277,9 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                     foreach (const auto &dataPair, fieldDataArray)
                     {
                         auto dataPairArray = dataPair.toArray();
-                        categoryValues.append(dataPairArray[1].toString());
                         dateSeries->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
-                                           dataPairArray[1].toString().right(2).toDouble());
-                        relSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toString().right(2).toDouble());
+                                           categoryValues.indexOf(dataPairArray[1].toString()));
+                        relSeries->append(dataPairArray[0].toDouble(), categoryValues.indexOf(dataPairArray[1].toString()));
                     }
                 }
                 else
@@ -301,8 +327,6 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
 
         if (!categoryValues.isEmpty())
         {
-            categoryValues.removeDuplicates();
-            categoryValues.sort();
             dateTimeStringAxis->setRange(0, categoryValues.count() - 1);
             relTimeStringAxis->setRange(0, categoryValues.count() - 1);
             for (auto i = 0; i < categoryValues.count(); i++)
@@ -385,10 +409,16 @@ void MainWindow::showStatus(qreal x, qreal y, QString title)
 {
     QString message;
     auto *chartView = qobject_cast<ChartView *>(sender());
+    auto yVal = QString::number(y);
+    if (QString(chartView->chart()->axes(Qt::Vertical)[0]->metaObject()->className()) == QString("QCategoryAxis"))
+    {
+        auto *yAxis = qobject_cast<QCategoryAxis *>(chartView->chart()->axes(Qt::Vertical)[0]);
+        yVal = yAxis->categoriesLabels()[(int)y];
+    }
     if (QString(chartView->chart()->axes(Qt::Horizontal)[0]->metaObject()->className()) == QString("QDateTimeAxis"))
-        message = QDateTime::fromMSecsSinceEpoch(x).toString("yyyy-MM-dd HH:mm:ss") + ", " + QString::number(y);
+        message = QDateTime::fromMSecsSinceEpoch(x).toString("yyyy-MM-dd HH:mm:ss") + ", " + yVal;
     else
-        message = QString::number(x) + ", " + QString::number(y);
+        message = QString::number(x) + ", " + yVal;
     statusBar()->showMessage("Run " + title + ": " + message);
 }
 

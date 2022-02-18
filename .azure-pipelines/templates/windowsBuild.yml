@@ -18,10 +18,11 @@ steps:
       python3 -m pip install pyinstaller
       python3 -m pip install flask
       python3 -m pip install h5py
+      python3 -m pip install lxml
     displayName: 'Install Prerequisites'
   - script: |
       python3 -m pip install aqtinstall
-      python3 -m aqt install-qt --outputdir $(Build.BinariesDirectory)\\Qt windows desktop ${{ parameters.qtver }} win64_mingw81 -m qtcharts
+      python3 -m aqt install-qt --outputdir $(Build.BinariesDirectory)\\Qt windows desktop ${{ parameters.qtver }} win64_msvc2019_64 -m all
     displayName: 'Install Qt'
   - powershell: |
       $ErrorActionPreference = 'Stop'
@@ -31,16 +32,17 @@ steps:
     displayName: 'Download HDF5 Artifacts'
   - bash: |
       set -ex
-      ls C:/ProgramData/chocolatey/lib/mingw
       HDF5_DIR="$(pwd)/${{ parameters.hdf5tag }}"
-      Qt6_DIR="/d/a/1/b/Qt/6.1.2/mingw81_64"
-      PATH="${PATH}:${Qt6_DIR}"
+      Qt6_DIR="/d/a/1/b/Qt/6.1.2/msvc2019_64"
+      PATH="${Qt6_DIR}:${PATH}"
       mkdir build
       cd build
-      cmake ../ -G "MinGW Makefiles" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}/lib/cmake
-      MinGW32-make.exe
+      cmake ../ -G "Visual Studio 16 2019" -A "x64" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}/lib/cmake
+      cmake --build . --config Release
+      cmake --install .
 
       cd ../
-      pyinstaller backend/isisInternal.py 
+      pyinstaller backend/isisInternal.py
       pyinstaller --icon=ci/windows/JournalViewer2.ico backend/launch.py
+      mv dist/isisInternal dist/launch
     displayName: 'Build'

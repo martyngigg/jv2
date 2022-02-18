@@ -3,25 +3,32 @@ parameters:
     default: 6.1.2
     
 steps:
+  - script: |
+      choco install -y zip innoextract
+    displayName: 'Install Prerequisites'
   - powershell: |
       $ErrorActionPreference = 'Stop'
       # Set paths
-      $env:Qt6_DIR = "$(Build.BinariesDirectory)\Qt\${{ parameters.qtver }}\mingw81_64"
+      $env:Qt6_DIR = "$(Build.BinariesDirectory)\Qt\${{ parameters.qtver }}\msvc2019_64"
       $env:PATH += ";$env:Qt6_DIR" + "\bin"
-      echo $env:Qt6_DIR
-      $env:MINGW_LIB_DIR = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
-      $env:JV2_DIR = $(Get-Location).path + "\build"
-      # Collect artifacts
+      $env:JV2_DIR = $(Get-Location).path + "\build\Release"
+      $env:BACKEND_DIR = $(Get-Location).path + "\dist"
+      
+      # Run Inno Setup Compiler
+      iscc.exe /O.\ .\ci\windows\jv2.iss
+      $exe = Get-ChildItem  .\*.exe
+      echo "Executable installer is "$exe.Name
+
+      # Create Zip from Exe
+      innoextract.exe $exe.Name -d $exe.BaseName
+      mv "$($exe.BaseName)\app\bin\*" $exe.BaseName
+      mv "$($exe.BaseName)\app" ./
+      #rm -Force "$($exe.BaseName)\app"
+      $zip = $exe.BaseName + ".zip"
+      zip -r $zip $exe.BaseName
+
       mkdir packages
-      mkdir packages\jv2
-      windeployqt --dir packages\jv2 build\jv2.exe
-      mv build\jv2.exe packages\jv2
-      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libgcc_s_seh-1.dll packages\jv2
-      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libstdc++-6.dll packages\jv2
-      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libwinpthread-1.dll packages\jv2
-      cp C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin\libquadmath-0.dll packages\jv2
-      mv dist\launch packages
-      mv dist\isisInternal packages\launch
-      mv packages\jv2 packages\launch
-      Compress-Archive -Path 'packages' -DestinationPath 'packageZip.zip'
+      mv $zip packages
+      mv $exe.Name packages
+
     displayName: 'Create Packages'

@@ -50,6 +50,7 @@ stages:
     
       - job: 'osx'
         displayName: 'OSX'
+        eq(1,0)
         pool:
           vmImage: 'macos-latest'
         steps:

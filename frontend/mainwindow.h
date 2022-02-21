@@ -80,6 +80,7 @@ class MainWindow : public QMainWindow
     // Misc Interface Functions
     void removeTab(int index);
     void savePref();
+    void clearPref();
     void columnHider(int state);
 
     protected:

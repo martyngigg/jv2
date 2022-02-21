@@ -350,6 +350,42 @@ void MainWindow::savePref()
     }
 }
 
+void MainWindow::clearPref()
+{
+
+    QFile file("../extra/tableConfig.xml");
+    file.open(QIODevice::ReadOnly);
+    QDomDocument dom;
+    dom.setContent(&file);
+    file.close();
+
+    auto rootelem = dom.documentElement();
+    auto nodelist = rootelem.elementsByTagName("inst");
+
+    // Clear preferences from xml file
+    QDomNode node;
+    QDomElement elem;
+    QDomElement columns;
+    for (auto i = 0; i < nodelist.count(); i++)
+    {
+        node = nodelist.item(i);
+        elem = node.toElement();
+        if (elem.attribute("name") == instName_)
+        {
+            auto oldColumns = elem.elementsByTagName("Columns");
+            if (!oldColumns.isEmpty())
+                elem.removeChild(elem.elementsByTagName("Columns").item(0));
+        }
+    }
+    if (!dom.toByteArray().isEmpty())
+    {
+        QFile file("../extra/tableConfig.xml");
+        file.open(QIODevice::WriteOnly);
+        file.write(dom.toByteArray());
+        file.close();
+    }
+}
+
 void MainWindow::setLoadScreen(bool state)
 {
     if (state)

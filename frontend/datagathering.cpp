@@ -103,6 +103,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
         // Fills viewMenu_ with all columns
         viewMenu_->clear();
         viewMenu_->addAction("savePref", this, SLOT(savePref()));
+        viewMenu_->addAction("clearPref", this, SLOT(clearPref()));
         viewMenu_->addSeparator();
         foreach (const QString &key, jsonObject.keys())
         {

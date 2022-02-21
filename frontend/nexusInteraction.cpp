@@ -445,6 +445,12 @@ void MainWindow::handleSpectraCharting(HttpRequestWorker *worker)
             auto runArray = run.toArray();
             // For each plot point
             auto *series = new QLineSeries();
+
+            connect(series, &QLineSeries::hovered,
+                    [=](const QPointF point, bool hovered) { chartView->setHovered(point, hovered, series->name()); });
+            connect(chartView, SIGNAL(showCoordinates(qreal, qreal, QString)), this, SLOT(showStatus(qreal, qreal, QString)));
+            connect(chartView, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
+
             // Set dateSeries ID
             QString name = runArray.first().toString();
             runs += name + ", ";

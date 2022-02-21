@@ -22,6 +22,9 @@
 #include <QWidgetAction>
 #include <QtGui>
 
+#include "./ui_graphwidget.h"
+#include "graphwidget.h"
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
     ui_->setupUi(this);

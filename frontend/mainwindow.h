@@ -77,6 +77,7 @@ class MainWindow : public QMainWindow
     void handleSpectraCharting(HttpRequestWorker *worker);
     void plotSpectra(HttpRequestWorker *count);
     void getSpectrumCount();
+
     // Misc Interface Functions
     void removeTab(int index);
     void savePref();

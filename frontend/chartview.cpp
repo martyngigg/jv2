@@ -33,6 +33,30 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QChartView(chart, parent)
     coordStartLabelY_->setFont(QFont("Helvetica", 8));
 }
 
+ChartView::ChartView(QWidget *parent) : QChartView(parent)
+{
+    setRubberBand(QChartView::HorizontalRubberBand);
+    setDragMode(QGraphicsView::NoDrag);
+    this->setMouseTracking(true);
+    hovered_ = "";
+}
+
+void ChartView::assignChart(QChart *chart)
+{
+    this->setChart(chart);
+    coordLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
+    coordLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
+    coordStartLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
+    coordStartLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
+    coordLabelX_->setBrush(QColor(0, 0, 0, 127));
+    coordLabelY_->setBrush(QColor(0, 0, 0, 127));
+    coordLabelX_->setFont(QFont("Helvetica", 8));
+    coordLabelY_->setFont(QFont("Helvetica", 8));
+    coordStartLabelX_->setBrush(QColor(0, 0, 0, 127));
+    coordStartLabelY_->setBrush(QColor(0, 0, 0, 127));
+    coordStartLabelX_->setFont(QFont("Helvetica", 8));
+    coordStartLabelY_->setFont(QFont("Helvetica", 8));
+}
 void ChartView::keyPressEvent(QKeyEvent *event)
 {
     {

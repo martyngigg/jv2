@@ -3,6 +3,7 @@
 
 #include "./ui_mainwindow.h"
 #include "chartview.h"
+#include "graphwidget.h"
 #include "mainwindow.h"
 #include <QAction>
 #include <QCategoryAxis>
@@ -424,9 +425,9 @@ void MainWindow::showStatus(qreal x, qreal y, QString title)
 
 void MainWindow::handleSpectraCharting(HttpRequestWorker *worker)
 {
-    auto *window = new QWidget;
     auto *chart = new QChart();
-    auto *chartView = new ChartView(chart, window);
+    auto *window = new GraphWidget(this, chart);
+    ChartView *chartView = window->getChartView();
 
     QString msg;
     if (worker->error_type == QNetworkReply::NoError)
@@ -457,19 +458,21 @@ void MainWindow::handleSpectraCharting(HttpRequestWorker *worker)
             series->setName(name);
             runArray.removeFirst();
 
-            foreach (const auto &dataPair, runArray)
+            for (auto i = 0; i < runArray.count() - 1; i++)
             {
-                auto dataPairArray = dataPair.toArray();
-                series->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
+                const auto &dataPairTOFStart = runArray.at(i);
+                auto dataPairTOFStartArray = dataPairTOFStart.toArray();
+                const auto &dataPairTOFEnd = runArray.at(i + 1);
+                auto dataPairTOFEndArray = dataPairTOFEnd.toArray();
+                auto centreBin =
+                    dataPairTOFStart[0].toDouble() + (dataPairTOFEnd[0].toDouble() - dataPairTOFStart[0].toDouble()) / 2;
+                series->append(centreBin, dataPairTOFStart[1].toDouble());
             }
             chart->addSeries(series);
         }
         chart->createDefaultAxes();
         chart->axes(Qt::Horizontal)[0]->setTitleText("Time of flight, &#181;s");
         chart->axes(Qt::Vertical)[0]->setTitleText("Counts");
-        auto *gridLayout = new QGridLayout(window);
-
-        gridLayout->addWidget(chartView, 1, 0, -1, -1);
         QString tabName = field;
         ui_->tabWidget->addTab(window, tabName);
         ui_->tabWidget->setCurrentIndex(ui_->tabWidget->count() - 1);
@@ -512,7 +515,6 @@ void MainWindow::plotSpectra(HttpRequestWorker *count)
     auto spectrumNumber = QInputDialog::getInt(this, tr("Plot Detector Spectrum"),
                                                tr("Enter detector spectrum to plot (0-" + spectraCount + "):"), 0, 0,
                                                count->response.toInt() - 1, 1);
-
     auto runNos = getRunNos();
     // Error handling
     if (runNos.size() == 0)

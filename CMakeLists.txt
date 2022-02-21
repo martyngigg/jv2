@@ -51,7 +51,10 @@ set(PROJECT_SOURCES
     frontend/jsontablemodel.cpp
     frontend/jsontablemodel.h
     frontend/chartview.cpp
-    frontend/chartview.h)
+    frontend/chartview.h
+    frontend/graphwidget.cpp
+    frontend/graphwidget.h
+    frontend/graphwidget.ui)
 
 if(WIN32)
   # Add global NOMINMAX define for Windows systems, and inhibit console creation

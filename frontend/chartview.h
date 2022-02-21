@@ -13,6 +13,8 @@ class ChartView : public QChartView
 
     public:
     ChartView(QChart *chart, QWidget *parent = 0);
+    ChartView(QWidget *parent = 0);
+    void assignChart(QChart *chart);
 
     public slots:
     void setHovered(const QPointF point, bool hovered, QString title);

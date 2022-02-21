@@ -42,7 +42,7 @@ QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, in
         return m_header[section]["index"]; // Index == database name
 
     if (role != Qt::DisplayRole)
-        return QVariant();
+        return {};
 
     switch (orientation)
     {
@@ -50,9 +50,9 @@ QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, in
             return m_header[section]["title"]; // Title == desired display name
         case Qt::Vertical:
             // return section + 1;
-            return QVariant();
+            return {};
         default:
-            return QVariant();
+            return {};
     }
 }
 
@@ -69,81 +69,45 @@ QJsonObject JsonTableModel::getJsonObject(const QModelIndex &index) const
 // Fills table view
 QVariant JsonTableModel::data(const QModelIndex &index, int role) const
 {
-    switch (role)
+    if (role != Qt::DisplayRole)
+        return {};
+
+    QJsonObject obj = getJsonObject(index);
+    const QString &key = m_header[index.column()]["index"];
+    if (!obj.contains(key))
+        return {};
+    QJsonValue v = obj[key];
+
+    if (v.isDouble())
+        return QString::number(v.toDouble());
+    if (!v.isString())
+        return {};
+
+    // if title = Run Numbers then format (for grouped data)
+    if (m_header[index.column()]["title"] == "Run Numbers")
     {
-        case Qt::DisplayRole:
-        {
-            QJsonObject obj = getJsonObject(index);
-            const QString &key = m_header[index.column()]["index"];
-            if (obj.contains(key))
-            {
-                QJsonValue v = obj[key];
-
-                if (v.isString())
-                {
-                    // if title = Run Numbers then format
-                    if (m_header[index.column()]["title"] == "Run Numbers")
-                    {
-                        // Format grouped runs display
-                        auto runArr = v.toString().split(";");
-                        if (runArr.size() == 1)
-                            return runArr[0];
-                        QString displayString = runArr[0];
-                        for (auto i = 1; i < runArr.size(); i++)
-                            if (runArr[i].toInt() == runArr[i - 1].toInt() + 1)
-                                displayString += "-" + runArr[i];
-                            else
-                                displayString += "," + runArr[i];
-                        QStringList splitDisplay;
-                        foreach (const auto &string, displayString.split(","))
-                        {
-                            if (string.contains("-"))
-                                splitDisplay.append(string.left(string.indexOf("-") + 1) +
-                                                    string.right(string.size() - string.lastIndexOf("-") - 1));
-                            else
-                                splitDisplay.append(string);
-                        }
-
-                        return splitDisplay.join(",");
-                    }
-                    // if title = duration then format
-                    if (m_header[index.column()]["index"] == "duration")
-                    {
-                        int total, seconds, hours, minutes;
-                        total = v.toString().toInt();
-                        minutes = total / 60;
-                        seconds = total % 60;
-                        hours = minutes / 60;
-                        minutes = minutes % 60;
-                        return QString(QString::number(hours).rightJustified(2, '0') + ":" +
-                                       QString::number(minutes).rightJustified(2, '0') + ":" +
-                                       QString::number(seconds).rightJustified(2, '0'));
-                    }
-                    if (QDateTime::fromString(v.toString(), "yyyy-MM-dd'T'HH:mm:ss").isValid())
-                    {
-                        QDateTime time = QDateTime::fromString(v.toString(), "yyyy-MM-dd'T'HH:mm:ss");
-                        if (time.toString("dd/MM/yyyy") == QDateTime::currentDateTime().toString("dd/MM/yyyy"))
-                            return QString("Today at: ").append(time.toString("dd/MM/yyyy HH:mm:ss"));
-                        else if (time.addDays(-1).toString("dd/MM/yyyy") == QDateTime::currentDateTime().toString("dd/MM/yyyy"))
-                            return QString("Yesterday at: ").append(time.toString("dd/MM/yyyy HH:mm:ss"));
-                        else
-                            return time.toString("dd/MM/yyyy HH:mm:ss");
-                    }
-                    return v.toString();
-                }
-                else if (v.isDouble())
-                    return QString::number(v.toDouble());
-                else
-                    return QVariant();
-            }
+        // Format grouped runs display
+        auto runArr = v.toString().split(";");
+        if (runArr.size() == 1)
+            return runArr[0];
+        QString displayString = runArr[0];
+        for (auto i = 1; i < runArr.size(); i++)
+            if (runArr[i].toInt() == runArr[i - 1].toInt() + 1)
+                displayString += "-" + runArr[i];
             else
-                return QVariant();
+                displayString += "," + runArr[i];
+        QStringList splitDisplay;
+        foreach (const auto &string, displayString.split(","))
+        {
+            if (string.contains("-"))
+                splitDisplay.append(string.left(string.indexOf("-") + 1) +
+                                    string.right(string.size() - string.lastIndexOf("-") - 1));
+            else
+                splitDisplay.append(string);
         }
-        case Qt::ToolTipRole:
-            return QVariant();
-        default:
-            return QVariant();
+        return splitDisplay.join(",");
     }
+    return v.toString();
 }
 
 // Returns grouped table data

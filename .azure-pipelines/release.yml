@@ -12,14 +12,14 @@ pr: none
 
 stages:
   - template: templates/codeQualityChecks.yml
-  
+
   - stage: 'build'
     displayName: 'Build and Package'
     jobs:
       - job: 'windows'
-        displayName: 'windows-2019'
+        displayName: 'Windows'
         pool:
-          vmImage: 'windows-latest'
+          vmImage: 'windows-2019'
         steps:
           - checkout: self
             fetchDepth: 1
@@ -33,14 +33,12 @@ stages:
     
       - job: 'linux'
         displayName: 'Linux'
-        condition: eq(1,0)
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'ubuntu-18.04'
         steps:
           - checkout: self
             fetchDepth: 1
           - template: templates/linuxBuild.yml
-          - template: templates/linuxPackage.yml
           - task: PublishBuildArtifacts@1
             inputs:
               PathtoPublish: "packages/"
@@ -62,6 +60,7 @@ stages:
               PathtoPublish: "packages/"
               ArtifactName: 'osx-artifacts'
             displayName: 'Publish OSX Artifacts'
+
 
   # Create Release
   - template: templates/createRelease.yml

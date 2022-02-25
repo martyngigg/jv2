@@ -34,14 +34,12 @@ stages:
     
       - job: 'linux'
         displayName: 'Linux'
-        condition: eq(1,0)
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'ubuntu-18.04'
         steps:
           - checkout: self
             fetchDepth: 1
           - template: templates/linuxBuild.yml
-          - template: templates/linuxPackage.yml
           - task: PublishBuildArtifacts@1
             inputs:
               PathtoPublish: "packages/"

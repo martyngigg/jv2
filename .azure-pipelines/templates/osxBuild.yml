@@ -43,5 +43,5 @@ steps:
 
       cd ../
       pyinstaller backend/isisInternal.py
-      pyinstaller backend/launch.py
+      pyinstaller backend/jv2Setup.py
     displayName: 'Build'

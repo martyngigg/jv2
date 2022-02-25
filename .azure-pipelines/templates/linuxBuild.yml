@@ -67,8 +67,8 @@ steps:
       nix build -L .#${{ parameters.package }}
       nix build --json .#${{ parameters.package }} > archive.json
       pyinstaller backend/isisInternal.py
-      pyinstaller backend/launch.py
-      mv dist/isisInternal dist/launch
+      pyinstaller backend/jv2Setup.py
+      mv dist/isisInternal dist/jv2Setup
     displayName: 'Build'
   - bash: |
       set -ex
@@ -90,7 +90,7 @@ steps:
       
       cp ${{ parameters.package }} packages/jv2/${{ parameters.package }}
       rm ${{ parameters.package }}
-      mv dist/launch packages/launch
+      mv dist/jv2Setup packages/jv2Setup
     displayName: 'Package Executable'
     condition: eq(1,1)
   - bash: |

@@ -58,14 +58,16 @@ set(PROJECT_SOURCES
     frontend/graphwidget.h
     frontend/graphwidget.ui)
 
-if(WIN32)
-  # Add global NOMINMAX define for Windows systems, and inhibit console creation
-  add_definitions("-DNOMINMAX")
-  set(GUI_TYPE WIN32)
-  if(MINGW)
-    set(CMAKE_EXE_LINKER_FLAGS "-mwindows")
-  endif(MINGW)
-endif(WIN32)
+if(MSVC)
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
+
+if(MSVC)
+  set(CMAKE_EXE_LINKER_FLAGS_RELEASE
+      "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
+
 # Set bundle info
 if(APPLE)
   set(MACOSX_BUNDLE_ICON_FILE "jv2.icns")

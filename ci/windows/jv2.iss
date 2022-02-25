@@ -56,7 +56,7 @@ Source: "{#QtDir}\bin\Qt6Xml.dll"; DestDir: "{app}\bin\jv2"; Flags: ignoreversio
 Source: "{#QtDir}\plugins\iconengines\qsvgicon.dll"; DestDir: "{app}\bin\jv2\iconengines"; Flags: ignoreversion
 Source: "{#QtDir}\plugins\platforms\qwindows.dll"; DestDir: "{app}\bin\jv2\platforms"; Flags: ignoreversion
 Source: "{#QtDir}\plugins\imageformats\*.dll"; DestDir: "{app}\bin\jv2\imageformats"; Flags: ignoreversion
-Source: "{#BackendDir}\launch\*"; DestDir: "{app}\bin\launch"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BackendDir}\jv2Setup\*"; DestDir: "{app}\bin\jv2Setup"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Jv2Dir}\..\..\extra\*"; DestDir: "{app}\bin\extra"; Flags: ignoreversion
 ; Windows 7
 ;Source: "C:\Windows\System32\D3DCompiler_43.dll"; DestDir: "{app}\bin"; Flags: ignoreversion
@@ -64,8 +64,8 @@ Source: "{#Jv2Dir}\..\..\extra\*"; DestDir: "{app}\bin\extra"; Flags: ignorevers
 Source: "C:\Windows\System32\D3DCompiler_47.dll"; DestDir: "{app}\bin\jv2"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; IconFilename: "{app}\bin\jv2\JournalViewer2.ico"; Filename: "{app}\bin\launch\launch.exe"; WorkingDir: "{app}\bin\launch"
-Name: "{commondesktop}\{#MyAppName}"; IconFilename: "{app}\bin\jv2\JournalViewer2.ico"; Filename: "{app}\bin\launch\launch.exe"; WorkingDir: "{app}\bin\launch"; Tasks: desktopicon
+Name: "{group}\{#MyAppName}"; IconFilename: "{app}\bin\jv2\JournalViewer2.ico"; Filename: "{app}\bin\jv2Setup\jv2Setup.exe"; WorkingDir: "{app}\bin\jv2Setup"
+Name: "{commondesktop}\{#MyAppName}"; IconFilename: "{app}\bin\jv2\JournalViewer2.ico"; Filename: "{app}\bin\jv2Setup\jv2Setup.exe"; WorkingDir: "{app}\bin\jv2Setup"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\bin\launch\launch.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\bin\jv2Setup\jv2Setup.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

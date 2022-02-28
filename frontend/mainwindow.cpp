@@ -52,7 +52,7 @@ void MainWindow::initialiseElements()
     ui_->runDataTable->setStyleSheet("alternate-background-color: #e7e7e6;");
 
     // Sets instrument to last used
-    QSettings settings;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
     QString recentInstrument = settings.value("recentInstrument").toString();
     int instrumentIndex = -1;
     bool found = false;
@@ -87,7 +87,7 @@ void MainWindow::recentCycle()
     // Disable selections if api fails
     if (cyclesMenu_->actions().count() == 0)
         QWidget::setEnabled(false);
-    QSettings settings;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
     QString recentCycle = settings.value("recentCycle").toString();
     // Sets cycle to last used/ most recent if unavailable
     for (QAction *action : cyclesMenu_->actions())
@@ -132,7 +132,7 @@ void MainWindow::changeInst(std::tuple<QString, QString, QString> instrument)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Update history on close
-    QSettings settings;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
     settings.setValue("recentInstrument", instDisplayName_);
     settings.setValue("recentCycle", ui_->cycleButton->text());
 

@@ -110,11 +110,11 @@ void MainWindow::selectSimilar()
             break;
         }
     }
-    QString title = model_->index(ui_->runDataTable->rowAt(pos_.y()), TitleColumn).data().toString();
+    QString title = proxyModel_->index(ui_->runDataTable->rowAt(pos_.y()), TitleColumn).data().toString();
     for (auto i = 0; i < model_->rowCount(); i++)
     {
-        if (model_->index(i, TitleColumn).data().toString() == title)
-            ui_->runDataTable->selectionModel()->setCurrentIndex(model_->index(i, TitleColumn),
+        if (proxyModel_->index(i, TitleColumn).data().toString() == title)
+            ui_->runDataTable->selectionModel()->setCurrentIndex(proxyModel_->index(i, TitleColumn),
                                                                  QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 }

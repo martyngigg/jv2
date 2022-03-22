@@ -111,7 +111,7 @@ QString MainWindow::getRunNos()
     // Concats runs
     for (auto run : selectedRuns)
     {
-        runNo = model_->index(run.row(), runNoColumn).data().toString();
+        runNo = proxyModel_->index(run.row(), runNoColumn).data().toString();
         if (runNo.contains("-") || runNo.contains(","))
         {
             QString groupedRuns;

@@ -78,14 +78,20 @@ class MainWindow : public QMainWindow
     void showStatus(qreal x, qreal y, QString title);
 
     void handleSpectraCharting(HttpRequestWorker *worker);
+    void handleMonSpectraCharting(HttpRequestWorker *worker);
     void plotSpectra(HttpRequestWorker *count);
+    void plotMonSpectra(HttpRequestWorker *count);
     void getSpectrumCount();
+    void getMonitorCount();
 
     // Misc Interface Functions
     void removeTab(int index);
     void savePref();
     void clearPref();
     void columnHider(int state);
+    void muAmps(QString runs, bool checked, QString);
+    void runDivide(QString currentDetector, QString run, bool checked);
+    void monDivide(QString currentRun, QString mon, bool checked);
 
     void refresh(QString Status);
     void update(HttpRequestWorker *worker);

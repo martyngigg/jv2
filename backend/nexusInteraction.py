@@ -114,13 +114,27 @@ def fieldData(instrument, cycle, runs, fields):
 
 
 def getSpectrum(instrument, cycle, runs, spectra):
-    data = [spectra]
+    data = [[runs, spectra, "detector"]]
     for run in runs.split(";"):
         nxsFile = file(instrument, cycle, run)
         mainGroup = nxsFile['raw_data_1']
-        runData = [run]
+        runData = []
         time_of_flight = mainGroup["detector_1"]["time_of_flight"]
         counts = mainGroup["detector_1"]["counts"][0][int(spectra)]
+        runData += list(zip(time_of_flight.astype('float64'),
+                        counts.astype('float64')))
+        data.append(runData)
+    return data
+
+
+def getMonSpectrum(instrument, cycle, runs, monitor):
+    data = [[runs, monitor, "monitor"]]
+    for run in runs.split(";"):
+        nxsFile = file(instrument, cycle, run)
+        mainGroup = nxsFile['raw_data_1']
+        runData = []
+        time_of_flight = mainGroup["monitor_"+monitor]["time_of_flight"]
+        counts = mainGroup["monitor_"+monitor]["data"][0][0]
         runData += list(zip(time_of_flight.astype('float64'),
                         counts.astype('float64')))
         data.append(runData)
@@ -133,3 +147,34 @@ def getSpectrumRange(instrument, cycle, runs):
     mainGroup = nxsFile['raw_data_1']
     spectraCount = len(mainGroup["detector_1"]["counts"][0])
     return spectraCount
+
+
+def getMonitorRange(instrument, cycle, runs):
+    monRange = "0"
+    run = runs.split(";")[0]
+    nxsFile = file(instrument, cycle, run)
+    mainGroup = nxsFile['raw_data_1']
+    for key in mainGroup.keys():
+        if "monitor" in key:
+            if key.split("_")[1] > monRange and key.split("_")[1].isdigit():
+                monRange = key.split("_")[1]
+    return int(monRange)
+
+
+def detectorAnalysis(instrument, cycle, run):
+    nxsFile = file(instrument, cycle, run)
+    detectors = nxsFile['raw_data_1']["detector_1"]["counts"][0]
+    count = 0
+    for detector in detectors:
+        if any(detector):
+            count += 1
+    return str(count) + "/" + str(len(detectors))
+
+
+if __name__ == '__main__':
+    print("activated")
+    nxsFile = file("nimrod", "cycle_20_3", "71158")
+    mainGroup = nxsFile['raw_data_1']
+    for value in mainGroup['monitor_8']['data'][0][0]:
+        if (value > 0):
+            print(value)

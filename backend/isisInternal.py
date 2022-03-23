@@ -249,6 +249,12 @@ def getSpectrum(instrument, cycle, runs, spectra):
     data = nexusInteraction.getSpectrum(instrument, cycle, runs, spectra)
     return jsonify(data)
 
+
+@app.route('/getMonSpectrum/<instrument>/<cycle>/<runs>/<monitor>')
+def getMonSpectrum(instrument, cycle, runs, monitor):
+    data = nexusInteraction.getMonSpectrum(instrument, cycle, runs, monitor)
+    return jsonify(data)
+
 # Get spectra range
 
 
@@ -256,6 +262,40 @@ def getSpectrum(instrument, cycle, runs, spectra):
 def getSpectrumRange(instrument, cycle, runs):
     data = nexusInteraction.getSpectrumRange(instrument, cycle, runs)
     return jsonify(data)
+
+
+@app.route('/getMonitorRange/<instrument>/<cycle>/<runs>')
+def getMonitorRange(instrument, cycle, runs):
+    data = nexusInteraction.getMonitorRange(instrument, cycle, runs)
+    return jsonify(data)
+
+
+@app.route('/getDetectorAnalysis/<instrument>/<cycle>/<run>')
+def getDetectorAnalysis(instrument, cycle, run):
+    data = nexusInteraction.detectorAnalysis(instrument, cycle, run)
+    return jsonify(data)
+
+# Get total MuAmps
+
+
+@app.route('/getTotalMuAmps/<instrument>/<cycle>/<runs>')
+def getTotalMuAmps(instrument, cycle, runs):
+    url = dataLocation + 'ndx'
+    url += instrument+'/'+cycle
+    try:
+        response = urlopen(url)
+    except Exception:
+        return jsonify({"response": "ERR. url not found"})
+    tree = parse(response)
+    root = tree.getroot()
+    ns = {'tag': 'http://definition.nexusformat.org/schema/3.0'}
+    muAmps = ""
+    for run in runs.split(";"):
+        for runNo in root:
+            if (runNo.find('tag:run_number', ns).text.strip() == run):
+                muAmps += runNo.find('tag:proton_charge',
+                                     ns).text.strip() + ";"
+    return muAmps[:-1]
 
 # Check for data modifications
 

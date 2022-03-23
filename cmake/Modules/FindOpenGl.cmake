@@ -505,7 +505,7 @@ if(OPENGL_FOUND)
 
   # ::EGL is a GLVND library, and thus Linux-only: we don't bother checking
   # for a framework version of this library.
-  # Note we test for OpenGL::OpenGL as a target.  When this module is updated to
+  # Note we muAmps for OpenGL::OpenGL as a target.  When this module is updated to
   # support GLES, we would additionally want to check for the hypothetical GLES
   # target and enable EGL if either ::GLES or ::OpenGL is created.
   if(TARGET OpenGL::OpenGL AND OpenGL_EGL_FOUND AND NOT TARGET OpenGL::EGL)

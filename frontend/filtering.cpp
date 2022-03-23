@@ -148,7 +148,7 @@ void MainWindow::on_actionRun_Number_triggered()
 
     QString url_str = "http://127.0.0.1:5000/getGoToCycle/" + instName_ + "/" + textInput;
     HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    auto *worker = new HttpRequestWorker(this);
     connect(worker, &HttpRequestWorker::on_execution_finished,
             [=](HttpRequestWorker *workerProxy) { goTo(workerProxy, textInput); });
     worker->execute(input);

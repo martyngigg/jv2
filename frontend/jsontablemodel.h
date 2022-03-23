@@ -34,6 +34,8 @@ class JsonTableModel : public QAbstractTableModel
     virtual void groupData();
     virtual void unGroupData();
     void setColumnTitle(int section, QString title);
+    bool setData(const QModelIndex &index, QJsonObject rowData, int role = Qt::EditRole);
+    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
     private:
     Header m_header;

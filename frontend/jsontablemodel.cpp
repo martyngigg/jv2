@@ -162,3 +162,27 @@ void JsonTableModel::unGroupData()
 }
 
 void JsonTableModel::setColumnTitle(int section, QString title) { m_header[section]["index"] = title; }
+
+bool JsonTableModel::setData(const QModelIndex &index, QJsonObject rowData, int role)
+{
+    if (index.isValid() && role == Qt::EditRole)
+    {
+        const int row = index.row();
+        m_json[row] = rowData;
+        emit dataChanged(index, index.siblingAtColumn(rowData.count()), {Qt::DisplayRole, Qt::EditRole});
+        return true;
+    }
+
+    return false;
+}
+
+bool JsonTableModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+    emit layoutAboutToBeChanged();
+    beginInsertRows(parent, row, row + count);
+    for (int position = 0; position < count; ++position)
+        m_json.insert(row, QJsonValue());
+    endInsertRows();
+    emit layoutChanged();
+    return true;
+}

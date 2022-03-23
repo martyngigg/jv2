@@ -159,7 +159,7 @@ void MainWindow::currentInstrumentChanged(const QString &arg1)
     // Configure api call
     QString url_str = "http://127.0.0.1:5000/getCycles/" + arg1;
     HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    auto *worker = new HttpRequestWorker(this);
 
     // Call result handler when request completed
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this,
@@ -187,7 +187,7 @@ void MainWindow::changeCycle(QString value)
 
     QString url_str = "http://127.0.0.1:5000/getJournal/" + instName_ + "/" + cyclesMap_[value];
     HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    auto *worker = new HttpRequestWorker(this);
 
     // Call result handler when request completed
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));

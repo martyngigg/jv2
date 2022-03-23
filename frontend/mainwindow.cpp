@@ -19,6 +19,7 @@
 #include <QNetworkReply>
 #include <QSettings>
 #include <QSortFilterProxyModel>
+#include <QTimer>
 #include <QWidgetAction>
 #include <QtGui>
 
@@ -29,6 +30,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui_(new Ui::MainW
 {
     ui_->setupUi(this);
     initialiseElements();
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, [=]() { checkForUpdates(); });
+    timer->start(30000);
 }
 
 MainWindow::~MainWindow() { delete ui_; }
@@ -168,7 +173,7 @@ void MainWindow::massSearch(QString name, QString value)
 
     QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput;
     HttpRequestInput input(url_str);
-    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    auto *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
     worker->execute(input);
 
@@ -189,6 +194,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         ui_->groupButton->setChecked(!checked);
         on_groupButton_clicked(!checked);
     }
+    if (event->key() == Qt::Key_R && event->modifiers() == Qt::ControlModifier)
+        checkForUpdates();
+
+    if (event->key() == Qt::Key_K && event->modifiers() == Qt::ControlModifier)
+    {
+        auto index = model_->index(0, 0);
+        auto data = model_->getJsonObject(index);
+        model_->insertRows(0, 1);
+        model_->setData(index, data);
+    }
+
     if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
     {
         searchString_ = "";
@@ -400,5 +416,59 @@ void MainWindow::setLoadScreen(bool state)
     {
         QWidget::setEnabled(true);
         QGuiApplication::restoreOverrideCursor();
+    }
+}
+
+void MainWindow::checkForUpdates()
+{
+    QString url_str = "http://127.0.0.1:5000/pingCycle/" + instName_;
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    connect(worker, &HttpRequestWorker::on_execution_finished,
+            [=](HttpRequestWorker *workerProxy) { refresh(workerProxy->response); });
+    worker->execute(input);
+}
+
+void MainWindow::refresh(QString status)
+{
+    if (status != "")
+    {
+        qDebug() << "Update";
+        currentInstrumentChanged(instName_);
+        if (cyclesMap_[cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->text()] != status)
+        {
+            auto displayName = "Cycle " + status.split("_")[1] + "/" + status.split("_")[2].remove(".xml");
+            cyclesMap_[displayName] = status;
+
+            auto *action = new QAction(displayName, this);
+            connect(action, &QAction::triggered, [=]() { changeCycle(displayName); });
+            cyclesMenu_->addAction(action);
+        }
+        else if (cyclesMap_[ui_->cycleButton->text()] == status)
+        {
+            QString url_str = "http://127.0.0.1:5000/updateJournal/" + instName_ + "/" + status + "/" +
+                              model_->getJsonObject(model_->index(model_->rowCount() - 1, 0))["run_number"].toString();
+            HttpRequestInput input(url_str);
+            auto *worker = new HttpRequestWorker(this);
+            connect(worker, &HttpRequestWorker::on_execution_finished,
+                    [=](HttpRequestWorker *workerProxy) { update(workerProxy); });
+            worker->execute(input);
+        }
+    }
+    else
+    {
+        qDebug() << "no change";
+        return;
+    }
+}
+
+void MainWindow::update(HttpRequestWorker *worker)
+{
+    for (auto row : worker->json_array)
+    {
+        auto rowObject = row.toObject();
+        model_->insertRows(model_->rowCount(), 1);
+        auto index = model_->index(model_->rowCount() - 1, 0);
+        model_->setData(index, rowObject);
     }
 }

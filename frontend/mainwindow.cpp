@@ -240,17 +240,28 @@ QList<std::tuple<QString, QString, QString>> MainWindow::getInstruments()
     return instruments;
 }
 
+QDomDocument MainWindow::getConfig()
+{
+    QDomDocument dom;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+    if (!settings.contains("tableConfig"))
+    {
+        QFile file(":/tableConfig.xml");
+        file.open(QIODevice::ReadOnly);
+        dom.setContent(&file);
+        file.close();
+    }
+    else
+        dom.setContent(settings.value("tableConfig", "fail").toString());
+    return dom;
+}
+
 // Get the desired fields and their titles
 std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrument, QString instType)
 {
     std::vector<std::pair<QString, QString>> desiredInstFields;
     QDomNodeList desiredInstrumentFields;
-
-    QFile file(":/tableConfig.xml");
-    file.open(QIODevice::ReadOnly);
-    QDomDocument dom;
-    dom.setContent(&file);
-    file.close();
+    auto dom = getConfig();
 
     std::pair<QString, QString> column;
 
@@ -309,12 +320,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
 
 void MainWindow::savePref()
 {
-
-    QFile file(":/tableConfig.xml");
-    file.open(QIODevice::ReadOnly);
-    QDomDocument dom;
-    dom.setContent(&file);
-    file.close();
+    auto dom = getConfig();
 
     auto rootelem = dom.documentElement();
     auto nodelist = rootelem.elementsByTagName("inst");
@@ -362,21 +368,14 @@ void MainWindow::savePref()
     }
     if (!dom.toByteArray().isEmpty())
     {
-        QFile file(":/tableConfig.xml");
-        file.open(QIODevice::WriteOnly);
-        file.write(dom.toByteArray());
-        file.close();
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+        settings.setValue("tableConfig", dom.toByteArray());
     }
 }
 
 void MainWindow::clearPref()
 {
-
-    QFile file(":/tableConfig.xml");
-    file.open(QIODevice::ReadOnly);
-    QDomDocument dom;
-    dom.setContent(&file);
-    file.close();
+    auto dom = getConfig();
 
     auto rootelem = dom.documentElement();
     auto nodelist = rootelem.elementsByTagName("inst");
@@ -398,10 +397,8 @@ void MainWindow::clearPref()
     }
     if (!dom.toByteArray().isEmpty())
     {
-        QFile file(":/tableConfig.xml");
-        file.open(QIODevice::WriteOnly);
-        file.write(dom.toByteArray());
-        file.close();
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+        settings.setValue("tableConfig", dom.toByteArray());
     }
 }
 

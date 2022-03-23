@@ -102,8 +102,8 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
         // Fills viewMenu_ with all columns
         viewMenu_->clear();
-        viewMenu_->addAction("savePref", this, SLOT(savePref()));
-        viewMenu_->addAction("clearPref", this, SLOT(clearPref()));
+        viewMenu_->addAction("Save column state", this, SLOT(savePref()));
+        viewMenu_->addAction("Reset column state to default", this, SLOT(clearPref()));
         viewMenu_->addSeparator();
         foreach (const QString &key, jsonObject.keys())
         {

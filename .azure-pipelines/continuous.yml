@@ -18,6 +18,7 @@ stages:
     displayName: 'Build and Package'
     jobs:
       - job: 'windows'
+        timeoutInMinutes: 180
         displayName: 'Windows'
         pool:
           vmImage: 'windows-2019'
@@ -33,6 +34,7 @@ stages:
             displayName: 'Publish Windows Artifacts'
     
       - job: 'linux'
+        timeoutInMinutes: 180
         displayName: 'Linux'
         pool:
           vmImage: 'ubuntu-18.04'

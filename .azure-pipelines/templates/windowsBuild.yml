@@ -15,7 +15,7 @@ steps:
     inputs:
       versionSpec: '3.9'
   - script: |
-      python3 -m pip install pyinstaller
+      python3 -m pip install nuitka
       python3 -m pip install flask
       python3 -m pip install h5py
       python3 -m pip install lxml
@@ -42,7 +42,7 @@ steps:
       cmake --install .
 
       cd ../
-      pyinstaller backend/isisInternal.py --noconsole
-      pyinstaller --icon=ci/windows/JournalViewer2.ico backend/jv2Setup.py --noconsole
-      mv dist/isisInternal dist/jv2Setup
+      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console backend/isisInternal.py
+      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console backend/jv2Setup.py
+      ls -R
     displayName: 'Build'

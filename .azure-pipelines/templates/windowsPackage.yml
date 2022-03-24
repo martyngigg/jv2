@@ -12,7 +12,7 @@ steps:
       $env:Qt6_DIR = "$(Build.BinariesDirectory)\Qt\${{ parameters.qtver }}\msvc2019_64"
       $env:PATH += ";$env:Qt6_DIR" + "\bin"
       $env:JV2_DIR = $(Get-Location).path + "\build\Release"
-      $env:BACKEND_DIR = $(Get-Location).path + "\dist"
+      $env:BACKEND_DIR = $(Get-Location).path
       
       # Run Inno Setup Compiler
       iscc.exe /O.\ .\ci\windows\jv2.iss

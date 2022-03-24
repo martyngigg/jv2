@@ -197,14 +197,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_R && event->modifiers() == Qt::ControlModifier)
         checkForUpdates();
 
-    if (event->key() == Qt::Key_K && event->modifiers() == Qt::ControlModifier)
-    {
-        auto index = model_->index(0, 0);
-        auto data = model_->getJsonObject(index);
-        model_->insertRows(0, 1);
-        model_->setData(index, data);
-    }
-
     if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
     {
         searchString_ = "";

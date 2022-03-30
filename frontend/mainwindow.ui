@@ -255,6 +255,8 @@
      <addaction name="actionMassSearchRB_No"/>
      <addaction name="actionMassSearchTitle"/>
      <addaction name="actionMassSearchUser"/>
+     <addaction name="actionMassSearchRunRange"/>
+     <addaction name="actionMassSearchDateRange"/>
     </widget>
     <widget class="QMenu" name="menuGo_to_specific_run_number">
      <property name="title">
@@ -289,6 +291,16 @@
   <action name="actionMassSearchUser">
    <property name="text">
     <string>User</string>
+   </property>
+  </action>
+  <action name="actionMassSearchRunRange">
+   <property name="text">
+    <string>Run Range</string>
+   </property>
+  </action>
+  <action name="actionMassSearchDateRange">
+   <property name="text">
+    <string>Date Range</string>
    </property>
   </action>
   <action name="actionClear_cached_searches">

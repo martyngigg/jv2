@@ -22,8 +22,10 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
 
         cyclesMenu_->clear();
         cyclesMap_.clear();
-        foreach (const QJsonValue &value, worker->json_array)
+        QJsonValue value;
+        for (auto i = worker->json_array.count() - 1; i >= 0; i--)
         {
+            value = worker->json_array[i];
             // removes header_ file
             if (value.toString() != "journal.xml")
             {
@@ -53,7 +55,7 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
                 return;
             }
         }
-        cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->trigger();
+        cyclesMenu_->actions()[0]->trigger();
     }
     else
     {
@@ -83,13 +85,15 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
         header_.clear();
         foreach (const QString &key, jsonObject.keys())
         {
+            if (headersMap_[key].isEmpty())
+                headersMap_[key] = key;
             // Find matching indices
             auto it = std::find_if(desiredHeader_.begin(), desiredHeader_.end(),
                                    [key](const auto &data) { return data.first == key; });
             if (it != desiredHeader_.end())
                 header_.push_back(JsonTableModel::Heading({{"title", it->second}, {"index", key}}));
             else
-                header_.push_back(JsonTableModel::Heading({{"title", key}, {"index", key}}));
+                header_.push_back(JsonTableModel::Heading({{"title", headersMap_[key]}, {"index", key}}));
         }
 
         // Sets and fills table data
@@ -111,7 +115,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
             QCheckBox *checkBox = new QCheckBox(viewMenu_);
             QWidgetAction *checkableAction = new QWidgetAction(viewMenu_);
             checkableAction->setDefaultWidget(checkBox);
-            checkBox->setText(key);
+            checkBox->setText(headersMap_[key]);
             checkBox->setCheckState(Qt::PartiallyChecked);
             viewMenu_->addAction(checkableAction);
             connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(columnHider(int)));

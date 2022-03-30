@@ -95,9 +95,10 @@ def runData(file, fields, run):
 # Get unique fields over all runs
 
 
-def runFields(instrument, cycle, runs):
+def runFields(instrument, cycles, runs):
     runArr = runs.split(";")
-    nxsFile = file(instrument, cycle, runArr[0])
+    cycleArr = cycles.split(";")
+    nxsFile = file(instrument, cycleArr[0], runArr[0])
     fields = (dataFields(nxsFile))
     return fields
 

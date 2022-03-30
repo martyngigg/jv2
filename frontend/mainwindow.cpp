@@ -103,7 +103,7 @@ void MainWindow::recentCycle()
             return;
         }
     }
-    cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->trigger();
+    cyclesMenu_->actions()[0]->trigger();
 }
 
 // Fill instrument list
@@ -152,11 +152,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::massSearch(QString name, QString value)
 {
-    QString textInput = QInputDialog::getText(this, tr("Find"), tr(name.append(": ").toUtf8()), QLineEdit::Normal);
+    const char *prompt;
+    name.append(": ");
+    if (name == "Run Range: ")
+        prompt = "StartRun-EndRun:";
+    else if (name == "Date Range: ")
+        prompt = "yyyy/mm/dd-yyyy/mm/dd:";
+    else
+        prompt = name.toUtf8();
+    QString textInput = QInputDialog::getText(this, tr("Find"), tr(prompt), QLineEdit::Normal);
     QString text = name.append(textInput);
+    textInput.replace("/", ";");
     if (textInput.isEmpty())
         return;
-
     for (auto tuple : cachedMassSearch_)
     {
         if (std::get<1>(tuple) == text)
@@ -170,7 +178,6 @@ void MainWindow::massSearch(QString name, QString value)
             return;
         }
     }
-
     QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput;
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
@@ -215,6 +222,16 @@ QList<std::tuple<QString, QString, QString>> MainWindow::getInstruments()
     file.close();
     auto rootelem = dom.documentElement();
     auto nodelist = rootelem.elementsByTagName("inst");
+    auto headersList = rootelem.elementsByTagName("header");
+    headersMap_.clear();
+    QString header;
+    QString data;
+    for (auto i = 0; i < headersList.count(); i++)
+    {
+        header = headersList.item(i).toElement().attribute("name");
+        data = headersList.item(i).toElement().elementsByTagName("Data").item(0).toElement().text();
+        headersMap_[data] = header;
+    }
 
     QList<std::tuple<QString, QString, QString>> instruments;
     std::tuple<QString, QString, QString> instrument;
@@ -259,6 +276,7 @@ std::vector<std::pair<QString, QString>> MainWindow::getFields(QString instrumen
 
     auto rootelem = dom.documentElement();
     auto instList = rootelem.elementsByTagName("inst");
+
     for (auto i = 0; i < instList.count(); i++)
     {
         if (instList.item(i).toElement().attribute("name").toLower() == instrument)
@@ -424,14 +442,14 @@ void MainWindow::refresh(QString status)
     {
         qDebug() << "Update";
         currentInstrumentChanged(instName_);
-        if (cyclesMap_[cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->text()] != status)
+        if (cyclesMap_[cyclesMenu_->actions()[0]->text()] != status)
         {
             auto displayName = "Cycle " + status.split("_")[1] + "/" + status.split("_")[2].remove(".xml");
             cyclesMap_[displayName] = status;
 
             auto *action = new QAction(displayName, this);
             connect(action, &QAction::triggered, [=]() { changeCycle(displayName); });
-            cyclesMenu_->addAction(action);
+            cyclesMenu_->insertAction(cyclesMenu_->actions()[0], action);
         }
         else if (cyclesMap_[ui_->cycleButton->text()] == status)
         {

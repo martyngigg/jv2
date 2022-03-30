@@ -14,7 +14,7 @@ void MainWindow::columnHider(int state)
 
     for (auto i = 0; i < model_->columnCount(); ++i)
     {
-        if (action->text() == model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString())
+        if (action->text() == headersMap_[model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString()])
         {
             switch (state)
             {
@@ -87,11 +87,15 @@ void MainWindow::on_groupButton_clicked(bool checked)
 // Clears filter parameters
 void MainWindow::on_clearSearchButton_clicked() { ui_->filterBox->clear(); }
 
-void MainWindow::on_actionMassSearchRB_No_triggered() { massSearch("RB No.", "run_number"); }
+void MainWindow::on_actionMassSearchRB_No_triggered() { massSearch("RB No.", "experiment_identifier"); }
 
 void MainWindow::on_actionMassSearchTitle_triggered() { massSearch("Title", "title"); }
 
 void MainWindow::on_actionMassSearchUser_triggered() { massSearch("User name", "user_name"); }
+
+void MainWindow::on_actionMassSearchRunRange_triggered() { massSearch("Run Range", "run_number"); }
+
+void MainWindow::on_actionMassSearchDateRange_triggered() { massSearch("Date Range", "start_date"); }
 
 void MainWindow::on_actionClear_cached_searches_triggered()
 {
@@ -104,7 +108,7 @@ void MainWindow::on_actionClear_cached_searches_triggered()
         }
     }
     if (ui_->cycleButton->text()[0] == '[')
-        cyclesMenu_->actions()[cyclesMenu_->actions().count() - 1]->trigger();
+        cyclesMenu_->actions()[0]->trigger();
 }
 
 void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)

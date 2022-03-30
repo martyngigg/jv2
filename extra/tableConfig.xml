@@ -68,6 +68,11 @@
    <location>ndxlet</location>
    <type>Neutron</type>
   </inst>
+  <inst name="larmor">
+   <location>ndxlarmor</location>
+   <type>Neutron</type>
+   <displayName>LARMOR</displayName>
+  </inst>
   <inst name="loq">
    <location>ndxloq</location>
    <type>Neutron</type>

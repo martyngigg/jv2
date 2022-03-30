@@ -34,9 +34,9 @@ def shutdown_server():
 # Get nexus file fields
 
 
-@app.route('/getNexusFields/<instrument>/<cycle>/<runs>')
-def getNexusFields(instrument, cycle, runs):
-    runFields = nexusInteraction.runFields(instrument, cycle, runs)
+@app.route('/getNexusFields/<instrument>/<cycles>/<runs>')
+def getNexusFields(instrument, cycles, runs):
+    runFields = nexusInteraction.runFields(instrument, cycles, runs)
     return jsonify(runFields)
 
 # Get all log data from nexus field
@@ -171,6 +171,8 @@ def getAllJournals(instrument, search):
 
 @app.route('/getAllJournals/<instrument>/<field>/<search>')
 def getAllFieldJournals(instrument, field, search):
+    print("\nMass search initiated w/: " +
+          instrument + " " + field + " " + search)
     allFields = []
     nameSpace = {'data': 'http://definition.nexusformat.org/schema/3.0'}
     cycles = literal_eval(getCycles(instrument).get_data().decode())
@@ -179,7 +181,6 @@ def getAllFieldJournals(instrument, field, search):
     startTime = datetime.now()
 
     for cycle in (cycles):
-        print(instrument, " ", cycle)
         url = dataLocation + 'ndx' + \
             instrument+'/'+str(cycle)
         try:
@@ -189,8 +190,22 @@ def getAllFieldJournals(instrument, field, search):
         tree = ET.parse(response)
         root = tree.getroot()
         fields = []
-        path = "//*[contains(data:"+field+",'"+search+"')]"
+        if field == "run_number":
+            values = search.split("-")
+            path = "//*[data:run_number>"+values[0] + \
+                " and data:run_number<"+values[1]+"]"
+        elif field == "start_date":
+            values = search.replace(";", "").split("-")
+            dateAsNumber = \
+                "number(translate(" + \
+                "substring-before(data:start_time,'T'),'-',''))"
+            path = \
+                "//*["+dateAsNumber+" > "+values[0] + \
+                " and "+dateAsNumber+" < " + values[1]+"]"
+        else:
+            path = "//*[contains(data:"+field+",'"+search+"')]"
         foundElems = root.xpath(path, namespaces=nameSpace)
+        print(cycle + " FoundElems: " + str(len(foundElems)))
         for element in foundElems:
             runData = {}
             for data in element:
@@ -203,7 +218,6 @@ def getAllFieldJournals(instrument, field, search):
                 runData[dataId] = dataValue
             fields.append(runData)
         allFields += (fields)
-        print(len(foundElems))
 
     endTime = datetime.now()
     print(endTime - startTime)

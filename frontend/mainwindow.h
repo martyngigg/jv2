@@ -57,6 +57,8 @@ class MainWindow : public QMainWindow
     void on_actionMassSearchRB_No_triggered();
     void on_actionMassSearchTitle_triggered();
     void on_actionMassSearchUser_triggered();
+    void on_actionMassSearchRunRange_triggered();
+    void on_actionMassSearchDateRange_triggered();
     void on_actionClear_cached_searches_triggered();
     void goTo(HttpRequestWorker *worker, QString runNumber);
     void on_actionRun_Number_triggered();
@@ -126,6 +128,7 @@ class MainWindow : public QMainWindow
     QString instName_;
     QString instDisplayName_;
     QMap<QString, QString> cyclesMap_;
+    QMap<QString, QString> headersMap_;
     // Misc
     bool init_;
     QPoint pos_;

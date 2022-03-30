@@ -154,6 +154,11 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() / binWidths_[i][j];
+                if (i == 0 && j == 0)
+                {
+                    max = hold;
+                    min = hold;
+                }
                 if (hold > max)
                     max = hold;
                 else if (hold < min)
@@ -164,6 +169,11 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() * binWidths_[i][j];
+                if (i == 0 && j == 0)
+                {
+                    max = hold;
+                    min = hold;
+                }
                 if (hold > max)
                     max = hold;
                 else if (hold < min)
@@ -205,6 +215,11 @@ void GraphWidget::modifyAgainstString(QString values, bool checked)
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() / val;
+                if (i == 0 && j == 0)
+                {
+                    max = hold;
+                    min = hold;
+                }
                 if (hold > max)
                     max = hold;
                 else if (hold < min)
@@ -217,6 +232,11 @@ void GraphWidget::modifyAgainstString(QString values, bool checked)
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() * val;
+                if (i == 0 && j == 0)
+                {
+                    max = hold;
+                    min = hold;
+                }
                 if (hold > max)
                     max = hold;
                 else if (hold < min)
@@ -247,33 +267,43 @@ void GraphWidget::modifyAgainstWorker(HttpRequestWorker *worker, bool checked)
         auto points = xySeries->points();
         if (checked)
         {
-            for (auto i = 0; i < points.count(); i++)
+            for (auto j = 0; j < points.count(); j++)
             {
-                auto val = valueArray.at(i)[1].toDouble();
+                auto val = valueArray.at(j)[1].toDouble();
                 if (val != 0)
                 {
-                    auto hold = points[i].y() / val;
+                    auto hold = points[j].y() / val;
+                    if (i == 0 && j == 0)
+                    {
+                        max = hold;
+                        min = hold;
+                    }
                     if (hold > max)
                         max = hold;
                     else if (hold < min)
                         min = hold;
-                    points[i].setY(hold);
+                    points[j].setY(hold);
                 }
             }
         }
         else
         {
-            for (auto i = 0; i < points.count(); i++)
+            for (auto j = 0; j < points.count(); j++)
             {
-                auto val = valueArray.at(i)[1].toDouble();
+                auto val = valueArray.at(j)[1].toDouble();
                 if (val != 0)
                 {
-                    auto hold = points[i].y() * val;
+                    auto hold = points[j].y() * val;
+                    if (i == 0 && j == 0)
+                    {
+                        max = hold;
+                        min = hold;
+                    }
                     if (hold > max)
                         max = hold;
                     else if (hold < min)
                         min = hold;
-                    points[i].setY(hold);
+                    points[j].setY(hold);
                 }
             }
         }

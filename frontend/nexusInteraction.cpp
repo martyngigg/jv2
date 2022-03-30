@@ -26,12 +26,11 @@ void MainWindow::customMenuRequested(QPoint pos)
 {
     pos_ = pos;
     auto index = ui_->runDataTable->indexAt(pos);
-    auto runNos = getRunNos();
+    auto runNos = getRunNos().split("-")[0];
+    auto cycles = getRunNos().split("-")[1];
 
     QString url_str = "http://127.0.0.1:5000/getNexusFields/";
-    QString cycle = cyclesMap_[ui_->cycleButton->text()];
-    cycle.replace(0, 7, "cycle").replace(".xml", "");
-    url_str += instName_ + "/" + cycle + "/" + runNos;
+    url_str += instName_ + "/" + cycles + "/" + runNos;
 
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
@@ -102,21 +101,24 @@ QString MainWindow::getRunNos()
     auto selectedRuns = ui_->runDataTable->selectionModel()->selectedRows();
     // Finds run number location in table
     int runNoColumn;
+    int cycleColumn;
     for (auto i = 0; i < ui_->runDataTable->horizontalHeader()->count(); ++i)
     {
         if (model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() == "run_number")
-        {
             runNoColumn = i;
-            break;
-        }
+        else if (model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() == "isis_cycle")
+            cycleColumn = i;
     }
     // Gets all selected run numbers and fills graphing toggles
     QString runNos = "";
     QString runNo;
+    QString cycles = "";
+    QString cycle;
     // Concats runs
     for (auto run : selectedRuns)
     {
         runNo = proxyModel_->index(run.row(), runNoColumn).data().toString();
+        cycle = proxyModel_->index(run.row(), cycleColumn).data().toString();
         if (runNo.contains("-") || runNo.contains(","))
         {
             QString groupedRuns;
@@ -135,11 +137,15 @@ QString MainWindow::getRunNos()
             runNos.append(groupedRuns + ";");
         }
         else
+        {
             runNos.append(runNo + ";");
+            cycles.append("cycle_" + cycle + ";");
+        }
     }
     // Removes final ";"
     runNos.chop(1);
-    return runNos;
+    cycles.chop(1);
+    return runNos + "-" + cycles;
 }
 
 void MainWindow::contextGraph()
@@ -147,14 +153,14 @@ void MainWindow::contextGraph()
     // Gets signal object
     auto *contextAction = qobject_cast<QAction *>(sender());
 
-    auto runNos = getRunNos();
+    auto runNos = getRunNos().split("-")[0];
+    auto cycles = getRunNos().split("-")[1];
 
     // Error handling
     if (runNos.size() == 0)
         return;
     QString url_str = "http://127.0.0.1:5000/getNexusData/";
-    QString cycle = cyclesMap_[ui_->cycleButton->text()];
-    cycle.replace(0, 7, "cycle").replace(".xml", "");
+    QString cycle = cycles.split(";")[0];
 
     QString field = contextAction->data().toString().replace("/", ":");
     url_str += instName_ + "/" + cycle + "/" + runNos + "/" + field;
@@ -296,6 +302,8 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
                         dateSeries->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
                                            dataPairArray[1].toDouble());
                         relSeries->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
+                        if (dateTimeYAxis->min() == 0 && dateTimeYAxis->max() == 0)
+                            dateTimeYAxis->setRange(dataPairArray[1].toDouble(), dataPairArray[1].toDouble());
                         if (dataPairArray[1].toDouble() < dateTimeYAxis->min())
                             dateTimeYAxis->setMin(dataPairArray[1].toDouble());
                         if (dataPairArray[1].toDouble() > dateTimeYAxis->max())
@@ -569,7 +577,7 @@ void MainWindow::handleMonSpectraCharting(HttpRequestWorker *worker)
 
 void MainWindow::getSpectrumCount()
 {
-    auto runNos = getRunNos();
+    auto runNos = getRunNos().split("-")[0];
     // Error handling
     if (runNos.size() == 0)
         return;
@@ -588,7 +596,7 @@ void MainWindow::getSpectrumCount()
 
 void MainWindow::getMonitorCount()
 {
-    auto runNos = getRunNos();
+    auto runNos = getRunNos().split("-")[0];
     // Error handling
     if (runNos.size() == 0)
         return;
@@ -610,10 +618,13 @@ void MainWindow::plotSpectra(HttpRequestWorker *count)
     setLoadScreen(false);
     auto spectraCount = count->response.toUtf8();
     spectraCount.chop(1);
+    bool valid;
     auto spectrumNumber = QInputDialog::getInt(this, tr("Plot Detector Spectrum"),
                                                tr("Enter detector spectrum to plot (0-" + spectraCount + "):"), 0, 0,
-                                               count->response.toInt() - 1, 1);
-    auto runNos = getRunNos();
+                                               count->response.toInt() - 1, 1, &valid);
+    if (!valid)
+        return;
+    auto runNos = getRunNos().split("-")[0];
     // Error handling
     if (runNos.size() == 0)
         return;
@@ -634,10 +645,13 @@ void MainWindow::plotMonSpectra(HttpRequestWorker *count)
     setLoadScreen(false);
     auto monCount = count->response.toUtf8();
     monCount.chop(1);
+    bool valid;
     auto monNumber =
         QInputDialog::getInt(this, tr("Plot Monitor Spectrum"), tr("Enter monitor spectrum to plot (0-" + monCount + "):"), 0,
-                             0, count->response.toInt() - 1, 1);
-    auto runNos = getRunNos();
+                             0, count->response.toInt() - 1, 1, &valid);
+    if (!valid)
+        return;
+    auto runNos = getRunNos().split("-")[0];
     // Error handling
     if (runNos.size() == 0)
         return;

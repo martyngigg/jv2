@@ -85,6 +85,11 @@
 		<type>Neutron</type>
 		<displayName>LET</displayName>
 	</inst>
+	<inst name="larmor">
+		<location>ndxlarmor</location>
+		<type>Neutron</type>
+		<displayName>LARMOR</displayName>
+	</inst>
 	<inst name="loq">
 		<location>ndxloq</location>
 		<type>Neutron</type>
@@ -223,4 +228,27 @@
 		</Column>
 	</Muon>
 </jv2Fields>
+<fieldNames>
+	<header name="Run No">
+		<Data>run_number</Data>
+	</header>
+	<header name="Title">
+		<Data>title</Data>
+	</header>
+	<header name="UAmps">
+		<Data>proton_charge</Data>
+	</header>
+	<header name="Start Time">
+		<Data>start_time</Data>
+	</header>
+	<header name="Duration">
+		<Data>duration</Data>
+	</header>
+	<header name="User Name">
+		<Data>user_name</Data>
+	</header>
+	<header name="RB No.">
+		<Data>experiment_identifier</Data>
+	</header>
+</fieldNames>
 </xml>

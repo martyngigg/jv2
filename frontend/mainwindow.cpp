@@ -84,6 +84,16 @@ void MainWindow::initialiseElements()
     searchString_ = "";
 
     ui_->runDataTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+
+    QString mountPoint = settings.value("mountPoint").toString();
+    QString url_str;
+    if (mountPoint.isEmpty())
+        url_str = "http://127.0.0.1:5000/setRoot/Default";
+    else
+        url_str = "http://127.0.0.1:5000/setRoot/" + mountPoint;
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
 }
 
 // Sets cycle to most recently viewed
@@ -410,6 +420,33 @@ void MainWindow::clearPref()
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
         settings.setValue("tableConfig", dom.toByteArray());
     }
+}
+
+void MainWindow::on_actionMountPoint_triggered()
+{
+    QString textInput = QInputDialog::getText(this, tr("Set Mount Point"), tr("Location:"), QLineEdit::Normal);
+    if (textInput.isEmpty())
+        return;
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+    settings.setValue("mountPoint", textInput);
+
+    QString url_str = "http://127.0.0.1:5000/setRoot/";
+    url_str += textInput;
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
+}
+
+void MainWindow::on_actionClearMountPoint_triggered()
+{
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+    settings.setValue("mountPoint", "");
+
+    QString url_str = "http://127.0.0.1:5000/setRoot/Default";
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
 }
 
 void MainWindow::setLoadScreen(bool state)

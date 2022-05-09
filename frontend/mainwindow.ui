@@ -242,6 +242,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionMountPoint"/>
+    <addaction name="actionClearMountPoint"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menuFind">
@@ -348,6 +350,16 @@
   <action name="actionRun_Number">
    <property name="text">
     <string>Run Number</string>
+   </property>
+  </action>
+  <action name="actionMountPoint">
+   <property name="text">
+    <string>Set archive location</string>
+   </property>
+  </action>
+  <action name="actionClearMountPoint">
+   <property name="text">
+    <string>Clear archive location</string>
    </property>
   </action>
  </widget>

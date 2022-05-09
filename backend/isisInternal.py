@@ -277,6 +277,17 @@ def getSpectrumRange(instrument, cycle, runs):
     data = nexusInteraction.getSpectrumRange(instrument, cycle, runs)
     return jsonify(data)
 
+# Set archive mount
+
+
+@app.route('/setRoot/<rootLocation>')
+def setRoot(rootLocation):
+    if rootLocation != "Default":
+        nexusInteraction.setRoot(rootLocation)
+    else:
+        nexusInteraction.setRoot("Default")
+    return jsonify("test")
+
 
 @app.route('/getMonitorRange/<instrument>/<cycle>/<runs>')
 def getMonitorRange(instrument, cycle, runs):

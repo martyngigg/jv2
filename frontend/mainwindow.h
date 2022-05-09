@@ -91,6 +91,10 @@ class MainWindow : public QMainWindow
     void savePref();
     void clearPref();
     void columnHider(int state);
+
+    void on_actionMountPoint_triggered();
+    void on_actionClearMountPoint_triggered();
+
     void muAmps(QString runs, bool checked, QString);
     void runDivide(QString currentDetector, QString run, bool checked);
     void monDivide(QString currentRun, QString mon, bool checked);

@@ -5,15 +5,26 @@ from h5py import File
 import os
 import platform
 
+# Set root
+
+
+def setRoot(inRoot):
+    global root
+    if inRoot != "Default":
+        root = inRoot
+    elif platform.system() == "Windows":
+        root = "/ISISdata/inst$"
+    else:
+        root = "isisdata"
+    print("inRoot: " + inRoot)
+    print("root: " + root)
+
 # Access nexus file
 
 
 def file(instrument, cycle, run):
-    if platform.system() == "Windows":
-        root = "/ISISdata/inst$"
-
-    else:
-        root = "isisdata"
+    global root
+    print("root (inFile): " + root)
     nxsRoot = "/{}/NDX{}/Instrument/data/{}/".format(root,
                                                      instrument.upper(), cycle)
     for root, dir, files in os.walk(nxsRoot):

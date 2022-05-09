@@ -101,6 +101,8 @@ class MainWindow : public QMainWindow
 
     void refresh(QString Status);
     void update(HttpRequestWorker *worker);
+    void on_actionSetLocalSource_triggered();
+    void on_actionClearLocalSource_triggered();
 
     protected:
     // Window close event

@@ -242,6 +242,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionSetLocalSource"/>
+    <addaction name="actionClearLocalSource"/>
     <addaction name="actionMountPoint"/>
     <addaction name="actionClearMountPoint"/>
     <addaction name="action_Quit"/>
@@ -350,6 +352,16 @@
   <action name="actionRun_Number">
    <property name="text">
     <string>Run Number</string>
+   </property>
+  </action>
+  <action name="actionClearLocalSource">
+   <property name="text">
+    <string>Clear local source</string>
+   </property>
+  </action>
+  <action name="actionSetLocalSource">
+   <property name="text">
+    <string>Set local source</string>
    </property>
   </action>
   <action name="actionMountPoint">

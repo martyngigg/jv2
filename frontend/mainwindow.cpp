@@ -85,15 +85,24 @@ void MainWindow::initialiseElements()
 
     ui_->runDataTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
-    QString mountPoint = settings.value("mountPoint").toString();
+    QString localSource = settings.value("localSource").toString();
     QString url_str;
+    if (localSource.isEmpty())
+        url_str = "http://127.0.0.1:5000/clearLocalSource";
+    else
+        url_str = "http://127.0.0.1:5000/setLocalSource/" + localSource.replace("/", ";");
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
+
+    QString mountPoint = settings.value("mountPoint").toString();
     if (mountPoint.isEmpty())
         url_str = "http://127.0.0.1:5000/setRoot/Default";
     else
         url_str = "http://127.0.0.1:5000/setRoot/" + mountPoint;
-    HttpRequestInput input(url_str);
-    auto *worker = new HttpRequestWorker(this);
-    worker->execute(input);
+    HttpRequestInput input2(url_str);
+    auto *worker2 = new HttpRequestWorker(this);
+    worker2->execute(input2);
 }
 
 // Sets cycle to most recently viewed
@@ -515,4 +524,30 @@ void MainWindow::update(HttpRequestWorker *worker)
         auto index = model_->index(model_->rowCount() - 1, 0);
         model_->setData(index, rowObject);
     }
+}
+
+void MainWindow::on_actionSetLocalSource_triggered()
+{
+    QString textInput = QInputDialog::getText(this, tr("Set local source"), tr("source:"), QLineEdit::Normal);
+    if (textInput.isEmpty())
+        return;
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+    settings.setValue("localSource", textInput);
+
+    QString url_str = "http://127.0.0.1:5000/setLocalSource/" + textInput.replace("/", ";");
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
+}
+
+void MainWindow::on_actionClearLocalSource_triggered()
+{
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
+    settings.setValue("localSource", "");
+
+    QString url_str = "http://127.0.0.1:5000/clearLocalSource";
+    HttpRequestInput input(url_str);
+    auto *worker = new HttpRequestWorker(this);
+    worker->execute(input);
 }

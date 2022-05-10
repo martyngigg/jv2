@@ -385,8 +385,8 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         auto *gridLayout = new QGridLayout(window);
         auto *axisToggleCheck = new QCheckBox("Plot relative to run start times", window);
         auto *addFieldButton = new QPushButton("Add field", window);
-        addFieldButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
+        addFieldButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
         connect(axisToggleCheck, SIGNAL(stateChanged(int)), this, SLOT(toggleAxis(int)));
         connect(addFieldButton, &QPushButton::clicked,
                 [=]() { fieldsMenu->exec(addFieldButton->mapToGlobal(QPoint(0, addFieldButton->height()))); });

@@ -9,7 +9,10 @@
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDebug>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QDomDocument>
+#include <QFormLayout>
 #include <QInputDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -172,6 +175,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::massSearch(QString name, QString value)
 {
     const char *prompt;
+    QString textInput;
+    QString text;
     name.append(": ");
     if (name == "Run Range: ")
         prompt = "StartRun-EndRun:";
@@ -179,8 +184,31 @@ void MainWindow::massSearch(QString name, QString value)
         prompt = "yyyy/mm/dd-yyyy/mm/dd:";
     else
         prompt = name.toUtf8();
-    QString textInput = QInputDialog::getText(this, tr("Find"), tr(prompt), QLineEdit::Normal);
-    QString text = name.append(textInput);
+
+    if (name.contains("Range"))
+    {
+        QDialog dialog(this);
+        QFormLayout form(&dialog);
+
+        form.addRow(new QLabel(name));
+        QLineEdit *start = new QLineEdit(&dialog);
+        form.addRow("Start:", start);
+        QLineEdit *end = new QLineEdit(&dialog);
+        form.addRow("End:", end);
+
+        QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+        form.addRow(&buttonBox);
+        QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+        QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+        if (dialog.exec() == QDialog::Accepted)
+            textInput = start->text() + "-" + end->text();
+        else
+            return;
+    }
+    else
+        textInput = QInputDialog::getText(this, tr("Find"), tr(prompt), QLineEdit::Normal);
+    text = name.append(textInput);
     textInput.replace("/", ";");
     if (textInput.isEmpty())
         return;
@@ -222,7 +250,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
     if (event->key() == Qt::Key_R && event->modifiers() == Qt::ControlModifier)
         checkForUpdates();
-
     if (event->key() == Qt::Key_F && event->modifiers() & Qt::ControlModifier && Qt::ShiftModifier)
     {
         searchString_ = "";

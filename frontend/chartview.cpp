@@ -2,6 +2,7 @@
 // Copyright (c) 2022 E. Devlin and T. Youngs
 
 #include "chartview.h"
+#include "httprequestworker.h"
 #include <QApplication>
 #include <QBrush>
 #include <QCategoryAxis>
@@ -10,6 +11,8 @@
 #include <QDebug>
 #include <QFont>
 #include <QGraphicsSimpleTextItem>
+#include <QLineSeries>
+#include <QMessageBox>
 #include <QValueAxis>
 #include <QtGui/QMouseEvent>
 
@@ -57,6 +60,86 @@ void ChartView::assignChart(QChart *chart)
     coordStartLabelX_->setFont(QFont("Helvetica", 8));
     coordStartLabelY_->setFont(QFont("Helvetica", 8));
 }
+
+void ChartView::addSeries(HttpRequestWorker *worker)
+{
+    QString msg;
+    if (worker->error_type == QNetworkReply::NoError)
+    {
+        // For each Run
+        auto array = worker->json_array;
+        array.removeFirst();
+        foreach (const auto &runFields, array)
+        {
+            auto runFieldsArray = runFields.toArray();
+            auto startTime = QDateTime::fromString(runFieldsArray.first()[0].toString(), "yyyy-MM-dd'T'HH:mm:ss");
+            auto endTime = QDateTime::fromString(runFieldsArray.first()[1].toString(), "yyyy-MM-dd'T'HH:mm:ss");
+            runFieldsArray.removeFirst();
+
+            // For each field
+            foreach (const auto &fieldData, runFieldsArray)
+            {
+                auto fieldDataArray = fieldData.toArray();
+                auto *series = new QLineSeries();
+                auto endTime = QDateTime::fromString(runFieldsArray.first()[1].toString(), "yyyy-MM-dd'T'HH:mm:ss");
+
+                connect(series, &QLineSeries::hovered,
+                        [=](const QPointF point, bool hovered) { this->setHovered(point, hovered, series->name()); });
+                // connect(this, SIGNAL(showCoordinates(qreal, qreal, QString)), this, SLOT(showStatus(qreal, qreal, QString)));
+                // connect(this, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
+
+                // Set dateSeries ID
+                QString name = fieldDataArray.first()[0].toString();
+                QString field = fieldDataArray.first()[1].toString().section(':', -1);
+                series->setName(name);
+                fieldDataArray.removeFirst();
+
+                foreach (const auto &dataPair, fieldDataArray)
+                {
+                    // qobject_cast<QValueAxis *>(chart()->axes(Qt::Horizontal)[0]);
+                    auto dataPairArray = dataPair.toArray();
+                    if (chart()->axes(Qt::Horizontal)[0]->type() == QAbstractAxis::AxisTypeValue)
+                        series->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
+                    else
+                        series->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
+                                       dataPairArray[1].toDouble());
+
+                    auto *axis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Vertical)[0]);
+                    if (dataPairArray[1].toDouble() < axis->min())
+                        axis->setMin(dataPairArray[1].toDouble());
+                    if (dataPairArray[1].toDouble() > axis->max())
+                        axis->setMax(dataPairArray[1].toDouble());
+                }
+                if (chart()->axes(Qt::Horizontal)[0]->type() == QAbstractAxis::AxisTypeValue)
+                {
+                    auto *axis = qobject_cast<QValueAxis *>(chart()->axes(Qt::Horizontal)[0]);
+                    if (series->at(0).x() < axis->min())
+                        axis->setMin(series->at(0).x());
+                    if (series->at(series->count() - 1).x() > axis->max())
+                        axis->setMax(series->at(series->count() - 1).x());
+                }
+                else
+                {
+                    auto *axis = qobject_cast<QDateTimeAxis *>(chart()->axes(Qt::Horizontal)[0]);
+                    if (startTime.addSecs(startTime.secsTo(QDateTime::fromMSecsSinceEpoch(series->at(0).x()))) < axis->min())
+                        axis->setMin(startTime.addSecs(startTime.secsTo(QDateTime::fromMSecsSinceEpoch(series->at(0).x()))));
+                    if (endTime > axis->max())
+                        axis->setMax(endTime);
+                }
+                chart()->addSeries(series);
+                series->attachAxis(chart()->axes(Qt::Horizontal)[0]);
+                series->attachAxis(chart()->axes(Qt::Vertical)[0]);
+            }
+        }
+    }
+    else
+    {
+        // an error occurred
+        msg = "Error2: " + worker->error_str;
+        QMessageBox::information(this, "", msg);
+    }
+}
+
 void ChartView::keyPressEvent(QKeyEvent *event)
 {
     {

@@ -117,7 +117,7 @@ def runFields(instrument, cycles, runs):
 
 
 def fieldData(instrument, cycle, runs, fields):
-    data = []
+    data = [runFields(instrument, cycle, runs)]
     runArr = runs.split(";")
     for run in runArr:
         nxsFile = file(instrument, cycle, run)

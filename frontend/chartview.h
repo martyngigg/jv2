@@ -4,6 +4,7 @@
 #ifndef CHARTVIEW_H
 #define CHARTVIEW_H
 
+#include "httprequestworker.h"
 #include <QtCharts/QChartView>
 #include <QtWidgets/QRubberBand>
 
@@ -18,6 +19,7 @@ class ChartView : public QChartView
 
     public slots:
     void setHovered(const QPointF point, bool hovered, QString title);
+    void addSeries(HttpRequestWorker *worker);
 
     signals:
     void showCoordinates(qreal x, qreal y, QString title);

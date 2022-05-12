@@ -244,8 +244,10 @@
     </property>
     <addaction name="actionSetLocalSource"/>
     <addaction name="actionClearLocalSource"/>
+    <addaction name="separator"/>
     <addaction name="actionMountPoint"/>
     <addaction name="actionClearMountPoint"/>
+    <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menuFind">
@@ -356,22 +358,22 @@
   </action>
   <action name="actionClearLocalSource">
    <property name="text">
-    <string>Clear local source</string>
+    <string>Clear local journal source</string>
    </property>
   </action>
   <action name="actionSetLocalSource">
    <property name="text">
-    <string>Set local source</string>
+    <string>Set local journal source</string>
    </property>
   </action>
   <action name="actionMountPoint">
    <property name="text">
-    <string>Set archive location</string>
+    <string>Set nexus archive location</string>
    </property>
   </action>
   <action name="actionClearMountPoint">
    <property name="text">
-    <string>Clear archive location</string>
+    <string>Clear nexus archive location</string>
    </property>
   </action>
  </widget>

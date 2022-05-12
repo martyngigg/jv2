@@ -104,6 +104,7 @@ class MainWindow : public QMainWindow
     void update(HttpRequestWorker *worker);
     void on_actionSetLocalSource_triggered();
     void on_actionClearLocalSource_triggered();
+    void refreshTable();
 
     protected:
     // Window close event
@@ -138,6 +139,7 @@ class MainWindow : public QMainWindow
     QMap<QString, QString> headersMap_;
     // Misc
     bool init_;
+    bool validSource_;
     QPoint pos_;
     QList<std::tuple<HttpRequestWorker *, QString>> cachedMassSearch_;
 };

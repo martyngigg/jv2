@@ -73,6 +73,14 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
     if (worker->error_type == QNetworkReply::NoError)
     {
+        if (worker->response == "\"invalid source\"\n")
+        {
+            statusBar()->showMessage("invalid source");
+            validSource_ = false;
+            return;
+        }
+        else
+            validSource_ = true;
         // Error handling
         if (ui_->groupButton->isChecked())
             ui_->groupButton->setChecked(false);

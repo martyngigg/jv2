@@ -19,6 +19,8 @@ import requests
 
 import nexusInteraction
 
+from os import path
+
 app = Flask(__name__)
 
 dataLocation = "http://data.isis.rl.ac.uk/journals/"
@@ -41,6 +43,7 @@ def shutdown_server():
 def setLocalSource(inLocalSource):
     global localSource
     localSource = inLocalSource.replace(";", "/")
+    print("local source: " + localSource)
     return jsonify("success")
 
 # clear local source
@@ -50,7 +53,21 @@ def setLocalSource(inLocalSource):
 def clearLocalSource():
     global localSource
     localSource = ""
+    print("local source: " + localSource)
     return jsonify("success")
+
+# validate local source
+
+
+@app.route('/validateLocalSource')
+def validateLocalSource():
+    global localSource
+    valid = path.isdir(localSource)
+    if valid or localSource == "":
+        response = ""
+    else:
+        response = "Local source not valid"
+    return jsonify(response)
 
 # Get nexus file fields
 
@@ -104,6 +121,8 @@ def getJournal(instrument, cycle):
             root = fromstring(file.read())
             print("data from file")
     except(Exception):
+        if localSource != "":
+            return jsonify("invalid source")
         url = dataLocation + 'ndx' + instrument+'/'+cycle
         try:
             response = urlopen(url)

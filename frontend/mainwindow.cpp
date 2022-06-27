@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "jsontablemodel.h"
+#include "mysortfilterproxymodel.h"
 #include <QChart>
 #include <QChartView>
 #include <QCheckBox>

@@ -93,7 +93,7 @@ steps:
       rm ${{ parameters.package }}
       mv dist/jv2Setup packages/jv2Setup
     displayName: 'Package Executable'
-    condition: eq(1,1)
+    condition: eq(1,0)
   - bash: |
       set -ex
       source ~/.nix-profile/etc/profile.d/nix.sh
@@ -104,4 +104,4 @@ steps:
       mkdir -p packages
       cp result packages/${{ parameters.package }}-${VERSION}.sif
     displayName: 'Package Singularity'
-    condition: eq(1,0)
+    condition: eq(1,1)

@@ -14,7 +14,12 @@ steps:
       brew update-reset
       brew install ninja
       brew install qt
+      brew install glfw3
+      brew install glew
       pip3 install pyinstaller
+      pip3 install flask
+      pip3 install h5py
+      pip3 install lxml
     displayName: 'Install Prerequisites'
   - bash: |
       wget https://github.com/disorderedmaterials/HDF5/releases/download/${{ parameters.hdf5tag }}/${{ parameters.hdf5tag }}-osx.zip
@@ -26,6 +31,7 @@ steps:
       HDF5_DIR="$(pwd)/${{ parameters.hdf5tag }}"
       # Managing packages
       QT_INSTALL_DIR=/usr/local/Cellar/qt
+      GLFW_INSTALL_DIR=/usr/local/Cellar/glfw
       QTVER=`ls -d ${QT_INSTALL_DIR}/* | sed "s/.*\(6\.[0-9][0-9]\.[0-9]\)/\1/g"`
       export Qt6_DIR=${QT_INSTALL_DIR}/$QTVER/lib/cmake/Qt6
       export Qt6Core_DIR=${QT_INSTALL_DIR}/$QTVER/lib/cmake/Qt6Core
@@ -35,10 +41,14 @@ steps:
       export Qt6Gui_DIR=${QT_INSTALL_DIR}/$QTVER/lib/cmake/Qt6Gui
       export Qt6Svg_DIR=${QT_INSTALL_DIR}/$QTVER/lib/cmake/Qt6Svg
       Qt6_ROOT=${QT_INSTALL_DIR}/${QTVER}
+      PATH="${Qt6_DIR}:${PATH}"
       # Building
       mkdir build
       cd build
-      cmake ../ -G Ninja -DCMAKE_Fortran_COMPILER:string="gfortran-9" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }}
+      
+      cmake ../ -DLOCAL_STATIC_HDF5:bool=True -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}
+      make
+      cmake ../ -G Ninja -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_Fortran_COMPILER:string="gfortran-9" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}
       ninja
 
       cd ../

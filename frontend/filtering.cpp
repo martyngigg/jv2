@@ -35,7 +35,7 @@ void MainWindow::columnHider(int state)
 // Filter table data
 void MainWindow::on_filterBox_textChanged(const QString &arg1)
 {
-    proxyModel_->setFilterFixedString(arg1.trimmed());
+    proxyModel_->setFilterString(arg1.trimmed());
     proxyModel_->setFilterKeyColumn(-1);
     proxyModel_->setFilterCaseSensitivity(Qt::CaseInsensitive);
 

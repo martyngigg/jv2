@@ -4,6 +4,7 @@
 #include "jsontablemodel.h"
 #include <QDebug>
 #include <QJsonObject>
+#include <QTime>
 
 // Model to handle json data in table view
 JsonTableModel::JsonTableModel(const JsonTableModel::Header &header_, QObject *parent)
@@ -127,8 +128,11 @@ void JsonTableModel::groupData()
         {
             if (std::get<0>(data) == valueObj["title"].toString())
             {
-                auto totalRunTime = std::get<1>(data).toInt() + valueObj["duration"].toString().toInt();
-                std::get<1>(data) = QString::number(totalRunTime);
+                auto currentTotal = QTime::fromString(std::get<1>(data), "HH:mm:ss");
+                // convert duration to seconds
+                auto newTime = QTime(0, 0, 0).secsTo(QTime::fromString(valueObj["duration"].toString(), "HH:mm:ss"));
+                auto totalRunTime = currentTotal.addSecs(newTime).toString("HH:mm:ss");
+                std::get<1>(data) = QString(totalRunTime);
                 std::get<2>(data) += ";" + valueObj["run_number"].toString();
                 unique = false;
                 break;

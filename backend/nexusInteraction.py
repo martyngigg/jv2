@@ -25,17 +25,38 @@ def setRoot(inRoot):
 def file(instrument, cycle, run):
     global root
     print("root (inFile): " + root)
-    nxsRoot = "/{}/NDX{}/Instrument/data/{}/".format(root,
-                                                     instrument.upper(), cycle)
-    for root, dir, files in os.walk(nxsRoot):
-        for file in files:
-            if file.endswith('{}.nxs'.format(run)):
-                nxsDir = nxsRoot + (str(file))
-                break
+
+    cycles = []
+    if cycle != " ":
+        cycles.append(cycle)
+    else:
+        print("findCycles")
+        dataRoot = "/{}/NDX{}/Instrument/data/".format(
+            root, instrument.upper())
+        for fileRoot, dir, files in os.walk(dataRoot):
+            for directory in dir:
+                if directory[:5] == "cycle":
+                    cycles.append(directory)
+
+    nxsDir = ""
+    for cycleValue in cycles:
+        nxsRoot = "/{}/NDX{}/Instrument/data/{}/".format(
+            root, instrument.upper(), cycleValue)
+        for fileRoot, dir, files in os.walk(nxsRoot):
+            for file in files:
+                if file.endswith('{}.nxs'.format(run)):
+                    nxsDir = nxsRoot + (str(file))
+                    break
+        if nxsDir != "":
+            break
+
     try:
+        print("nxsDir = " + nxsDir)
         nxsFile = File(nxsDir)
+        print("Successful file opening")
         return nxsFile
     except(Exception):
+        print("File error")
         return ["ERR. File failed to open"]
 
 # Get run times
@@ -116,12 +137,13 @@ def runFields(instrument, cycles, runs):
 # Get block data over all runs
 
 
-def fieldData(instrument, cycle, runs, fields):
-    data = [runFields(instrument, cycle, runs)]
+def fieldData(instrument, cycles, runs, fields):
+    data = [runFields(instrument, cycles, runs)]
+    cycleArr = cycles.split(";")
     runArr = runs.split(";")
-    for run in runArr:
-        nxsFile = file(instrument, cycle, run)
-        data.append(runData(nxsFile, fields, run))
+    for i in range(len(runArr)):
+        nxsFile = file(instrument, cycleArr[i], runArr[i])
+        data.append(runData(nxsFile, fields, runArr[i]))
     return data
 
 
@@ -185,7 +207,8 @@ def detectorAnalysis(instrument, cycle, run):
 
 if __name__ == '__main__':
     print("activated")
-    nxsFile = file("nimrod", "cycle_20_3", "71158")
+    setRoot("Default")
+    nxsFile = file("nimrod", "", "71158")
     mainGroup = nxsFile['raw_data_1']
     for value in mainGroup['monitor_8']['data'][0][0]:
         if (value > 0):

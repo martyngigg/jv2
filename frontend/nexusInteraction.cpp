@@ -28,6 +28,12 @@ void MainWindow::customMenuRequested(QPoint pos)
     auto index = ui_->runDataTable->indexAt(pos);
     auto runNos = getRunNos().split("-")[0];
     auto cycles = getRunNos().split("-")[1];
+    if (cycles == "")
+    {
+        for (auto run : runNos.split(";"))
+            cycles.append(" ;");
+        cycles.chop(1);
+    }
 
     QString url_str = "http://127.0.0.1:5000/getNexusFields/";
     url_str += instName_ + "/" + cycles + "/" + runNos;
@@ -155,15 +161,20 @@ void MainWindow::contextGraph()
 
     auto runNos = getRunNos().split("-")[0];
     auto cycles = getRunNos().split("-")[1];
+    if (cycles == "")
+    {
+        for (auto run : runNos.split(";"))
+            cycles.append(" ;");
+        cycles.chop(1);
+    }
 
     // Error handling
     if (runNos.size() == 0)
         return;
     QString url_str = "http://127.0.0.1:5000/getNexusData/";
-    QString cycle = cycles.split(";")[0];
 
     QString field = contextAction->data().toString().replace("/", ":");
-    url_str += instName_ + "/" + cycle + "/" + runNos + "/" + field;
+    url_str += instName_ + "/" + cycles + "/" + runNos + "/" + field;
 
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
@@ -460,6 +471,12 @@ void MainWindow::getField()
 
     auto runNos = getRunNos().split("-")[0];
     auto cycles = getRunNos().split("-")[1];
+    if (cycles == "")
+    {
+        for (auto run : runNos.split(";"))
+            cycles.append(" ;");
+        cycles.chop(1);
+    }
 
     QString url_str = "http://127.0.0.1:5000/getNexusData/";
     QString cycle = cycles.split(";")[0];
@@ -726,10 +743,19 @@ void MainWindow::plotMonSpectra(HttpRequestWorker *count)
 void MainWindow::muAmps(QString runs, bool checked, QString modified)
 {
     auto *window = qobject_cast<GraphWidget *>(sender());
+    QString modifier = "/muAmps";
     QString url_str =
         "http://127.0.0.1:5000/getTotalMuAmps/" + instName_ + "/" + cyclesMap_[ui_->cycleButton->text()] + "/" + runs;
+    auto yAxisTitle = window->getChartView()->chart()->axes(Qt::Vertical)[0]->titleText();
+
     if (modified != "-1")
         url_str += ";" + modified;
+
+    if (checked)
+        yAxisTitle.append(modifier);
+    else
+        yAxisTitle.remove(modifier);
+    window->getChartView()->chart()->axes(Qt::Vertical)[0]->setTitleText(yAxisTitle);
     HttpRequestInput input(url_str);
     HttpRequestWorker *worker = new HttpRequestWorker(this);
 
@@ -742,6 +768,15 @@ void MainWindow::muAmps(QString runs, bool checked, QString modified)
 void MainWindow::runDivide(QString currentDetector, QString run, bool checked)
 {
     auto *window = qobject_cast<GraphWidget *>(sender());
+    QString modifier = "/run " + run;
+
+    auto yAxisTitle = window->getChartView()->chart()->axes(Qt::Vertical)[0]->titleText();
+    if (checked)
+        yAxisTitle.append(modifier);
+    else
+        yAxisTitle.remove(modifier);
+    window->getChartView()->chart()->axes(Qt::Vertical)[0]->setTitleText(yAxisTitle);
+
     QString cycle = cyclesMap_[ui_->cycleButton->text()];
     cycle.replace(0, 7, "cycle").replace(".xml", "");
     QString url_str = "http://127.0.0.1:5000/getSpectrum/" + instName_ + "/" + cycle + "/" + run + "/" + currentDetector;
@@ -757,6 +792,15 @@ void MainWindow::runDivide(QString currentDetector, QString run, bool checked)
 void MainWindow::monDivide(QString currentRun, QString mon, bool checked)
 {
     auto *window = qobject_cast<GraphWidget *>(sender());
+    QString modifier = "/mon " + mon;
+
+    auto yAxisTitle = window->getChartView()->chart()->axes(Qt::Vertical)[0]->titleText();
+    if (checked)
+        yAxisTitle.append(modifier);
+    else
+        yAxisTitle.remove(modifier);
+    window->getChartView()->chart()->axes(Qt::Vertical)[0]->setTitleText(yAxisTitle);
+
     QString cycle = cyclesMap_[ui_->cycleButton->text()];
     cycle.replace(0, 7, "cycle").replace(".xml", "");
     QString url_str = "http://127.0.0.1:5000/getMonSpectrum/" + instName_ + "/" + cycle + "/" + currentRun + "/" + mon;

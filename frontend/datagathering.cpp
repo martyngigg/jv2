@@ -106,7 +106,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
         // Sets and fills table data
         model_ = new JsonTableModel(header_, this);
-        proxyModel_ = new QSortFilterProxyModel;
+        proxyModel_ = new MySortFilterProxyModel(this);
         proxyModel_->setSourceModel(model_);
         ui_->runDataTable->setModel(proxyModel_);
         model_->setJson(jsonArray);

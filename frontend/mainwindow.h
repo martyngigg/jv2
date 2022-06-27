@@ -6,6 +6,7 @@
 
 #include "httprequestworker.h"
 #include "jsontablemodel.h"
+#include "mysortfilterproxymodel.h"
 #include <QChart>
 #include <QCheckBox>
 #include <QDomDocument>
@@ -118,7 +119,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui_;
     // Table Stuff
     JsonTableModel *model_;
-    QSortFilterProxyModel *proxyModel_;
+    MySortFilterProxyModel *proxyModel_;
     JsonTableModel::Header header_;
     std::vector<std::pair<QString, QString>> desiredHeader_;
     // Menus

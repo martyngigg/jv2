@@ -146,11 +146,15 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
 {
     qreal max = 0;
     qreal min = 0;
+    QString modifier = "/microSeconds";
+    auto yAxisTitle = ui_->chartView->chart()->axes(Qt::Vertical)[0]->titleText();
+
     for (auto i = 0; i < ui_->chartView->chart()->series().count(); i++)
     {
         auto xySeries = qobject_cast<QXYSeries *>(ui_->chartView->chart()->series()[i]);
         auto points = xySeries->points();
         if (state == Qt::Checked)
+        {
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() / binWidths_[i][j];
@@ -165,7 +169,10 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
                     min = hold;
                 points[j].setY(hold);
             }
+            yAxisTitle.append(modifier);
+        }
         else
+        {
             for (auto j = 0; j < points.count(); j++)
             {
                 auto hold = points[j].y() * binWidths_[i][j];
@@ -180,7 +187,16 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
                     min = hold;
                 points[j].setY(hold);
             }
+            yAxisTitle.remove(modifier);
+        }
+        ui_->chartView->chart()->axes(Qt::Vertical)[0]->setTitleText(yAxisTitle);
+
         xySeries->replace(points);
+        if (max == min)
+        {
+            max++;
+            min--;
+        }
         ui_->chartView->chart()->axes()[1]->setMax(max);
         ui_->chartView->chart()->axes()[1]->setMin(min);
     }
@@ -245,6 +261,11 @@ void GraphWidget::modifyAgainstString(QString values, bool checked)
             }
         }
         xySeries->replace(points);
+        if (max == min)
+        {
+            max++;
+            min--;
+        }
         ui_->chartView->chart()->axes()[1]->setMax(max);
         ui_->chartView->chart()->axes()[1]->setMin(min);
     }
@@ -308,6 +329,11 @@ void GraphWidget::modifyAgainstWorker(HttpRequestWorker *worker, bool checked)
             }
         }
         xySeries->replace(points);
+        if (QString::number(max) == QString::number(min))
+        {
+            max++;
+            min--;
+        }
         ui_->chartView->chart()->axes()[1]->setMax(max);
         ui_->chartView->chart()->axes()[1]->setMin(min);
     }

@@ -44,7 +44,7 @@ void GraphWidget::setChartData(QJsonArray chartData)
     chartData_ = chartData;
     getBinWidths();
 }
-void GraphWidget::setLabel(QString label)
+void GraphWidget::setLabel(QString label) // Use for presenting spectra information
 {
     return; // ui_->statusLabel->setText(label);
 }
@@ -67,9 +67,9 @@ void GraphWidget::getBinWidths()
 
 ChartView *GraphWidget::getChartView() { return ui_->chartView; }
 
+// Handle normalisation conflicts
 void GraphWidget::runDivideSpinHandling()
 {
-    // IF AMP CHECKED? toggle off -> on?
     if (ui_->divideByRunSpin->isEnabled())
     {
         ui_->countsPerMicrosecondCheck->setChecked(false);
@@ -83,7 +83,7 @@ void GraphWidget::runDivideSpinHandling()
     if (modified_ == value && ui_->divideByRunSpin->isEnabled())
         return;
 
-    if (modified_ != "-1")
+    if (modified_ != "-1") // if modified
     {
         ui_->countsPerMicroAmpCheck->setChecked(false);
         if (type_ == "Detector")
@@ -95,7 +95,7 @@ void GraphWidget::runDivideSpinHandling()
             ui_->countsPerMicroAmpCheck->setChecked(true);
     }
 
-    if (value != "-1" && value != modified_)
+    if (value != "-1" && value != modified_) // handles switching conflicts
     {
         bool toggle = ui_->countsPerMicroAmpCheck->isChecked();
         ui_->countsPerMicroAmpCheck->setChecked(false);
@@ -109,6 +109,7 @@ void GraphWidget::runDivideSpinHandling()
     }
 }
 
+// Handle normalisation conflicts
 void GraphWidget::monDivideSpinHandling()
 {
     if (ui_->divideByMonitorSpin->isEnabled())
@@ -129,19 +130,20 @@ void GraphWidget::monDivideSpinHandling()
     if (modified_ == value && ui_->divideByMonitorSpin->isEnabled())
         return;
 
-    if (modified_ != "-1")
+    if (modified_ != "-1") // if modified
     {
         emit monDivide(chartRuns_, modified_, false);
         modified_ = "-1";
     }
 
-    if (value != "-1" && value != modified_)
+    if (value != "-1" && value != modified_) // handles switching conflicts
     {
         emit monDivide(chartRuns_, value, true);
         modified_ = value;
     }
 }
 
+// normalise against time
 void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
 {
     qreal max = 0;
@@ -192,7 +194,7 @@ void GraphWidget::on_countsPerMicrosecondCheck_stateChanged(int state)
         ui_->chartView->chart()->axes(Qt::Vertical)[0]->setTitleText(yAxisTitle);
 
         xySeries->replace(points);
-        if (max == min)
+        if (fabs(max - min) < 2) // handles flat lines w/ library limitations
         {
             max++;
             min--;
@@ -261,7 +263,7 @@ void GraphWidget::modifyAgainstString(QString values, bool checked)
             }
         }
         xySeries->replace(points);
-        if (max == min)
+        if (fabs(max - min) < 2) // handles flat lines w/ library limitations
         {
             max++;
             min--;
@@ -276,14 +278,14 @@ void GraphWidget::modifyAgainstWorker(HttpRequestWorker *worker, bool checked)
     QJsonArray valueArray;
     qreal max = 0;
     qreal min = 0;
-    auto dataType = worker->json_array[0].toArray()[2].toString(0);
-    worker->json_array.removeFirst();
+    auto dataType = worker->jsonArray[0].toArray()[2].toString(0);
+    worker->jsonArray.removeFirst();
     for (auto i = 0; i < ui_->chartView->chart()->series().count(); i++)
     {
-        if (worker->json_array.count() > 1)
-            valueArray = worker->json_array[i].toArray();
+        if (worker->jsonArray.count() > 1)
+            valueArray = worker->jsonArray[i].toArray();
         else
-            valueArray = worker->json_array[0].toArray();
+            valueArray = worker->jsonArray[0].toArray();
         auto xySeries = qobject_cast<QXYSeries *>(ui_->chartView->chart()->series()[i]);
         auto points = xySeries->points();
         if (checked)
@@ -329,7 +331,7 @@ void GraphWidget::modifyAgainstWorker(HttpRequestWorker *worker, bool checked)
             }
         }
         xySeries->replace(points);
-        if (QString::number(max) == QString::number(min))
+        if (fabs(max - min) < 2) // handles flat lines w/ library limitations
         {
             max++;
             min--;

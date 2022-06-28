@@ -16,16 +16,16 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
 {
     setLoadScreen(false);
     QString msg;
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
         auto response = worker->response;
 
         cyclesMenu_->clear();
         cyclesMap_.clear();
         QJsonValue value;
-        for (auto i = worker->json_array.count() - 1; i >= 0; i--)
+        for (auto i = worker->jsonArray.count() - 1; i >= 0; i--)
         {
-            value = worker->json_array[i];
+            value = worker->jsonArray[i];
             // removes header_ file
             if (value.toString() != "journal.xml")
             {
@@ -60,7 +60,7 @@ void MainWindow::handle_result_instruments(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error1: " + worker->error_str;
+        msg = "Error1: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }
@@ -71,7 +71,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
     setLoadScreen(false);
     QString msg;
 
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
         if (worker->response == "\"invalid source\"\n")
         {
@@ -87,7 +87,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
 
         // Get desired fields and titles from config files
         desiredHeader_ = getFields(instName_, instType_);
-        auto jsonArray = worker->json_array;
+        auto jsonArray = worker->jsonArray;
         auto jsonObject = jsonArray.at(0).toObject();
         // Add columns to header and give titles where applicable
         header_.clear();
@@ -158,7 +158,7 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }

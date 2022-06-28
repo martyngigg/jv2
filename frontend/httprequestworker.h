@@ -30,10 +30,10 @@ class HttpRequestWorker : public QObject
 
     public:
     QString response;
-    QNetworkReply::NetworkError error_type;
-    QString error_str;
+    QNetworkReply::NetworkError errorType;
+    QString errorString;
     QJsonDocument jsonResponse;
-    QJsonArray json_array;
+    QJsonArray jsonArray;
 
     explicit HttpRequestWorker(QObject *parent = 0);
 

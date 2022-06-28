@@ -8,39 +8,39 @@
 
 // Model to handle json data in table view
 JsonTableModel::JsonTableModel(const JsonTableModel::Header &header_, QObject *parent)
-    : QAbstractTableModel(parent), m_header(header_)
+    : QAbstractTableModel(parent), tableHeader_(header_)
 {
-    m_groupedHeader.push_back(Heading({{"title", "Title"}, {"index", "title"}}));
-    m_groupedHeader.push_back(Heading({{"title", "Total Duration"}, {"index", "duration"}}));
-    m_groupedHeader.push_back(Heading({{"title", "Run Numbers"}, {"index", "run_number"}}));
+    tableGroupedHeader_.push_back(Heading({{"title", "Title"}, {"index", "title"}}));
+    tableGroupedHeader_.push_back(Heading({{"title", "Total Duration"}, {"index", "duration"}}));
+    tableGroupedHeader_.push_back(Heading({{"title", "Run Numbers"}, {"index", "run_number"}}));
 }
 
 // Sets json data to populate table
 bool JsonTableModel::setJson(const QJsonArray &array)
 {
     beginResetModel();
-    m_json = array;
+    tableJsonData_ = array;
     endResetModel();
     return true;
 }
 
-QJsonArray JsonTableModel::getJson() { return m_json; }
+QJsonArray JsonTableModel::getJson() { return tableJsonData_; }
 
 // Sets header_ data to define table
 bool JsonTableModel::setHeader(const Header &array)
 {
     beginResetModel();
-    m_header = array;
+    tableHeader_ = array;
     endResetModel();
     return true;
 }
 
-JsonTableModel::Header JsonTableModel::getHeader() { return m_header; }
+JsonTableModel::Header JsonTableModel::getHeader() { return tableHeader_; }
 
 QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::UserRole)
-        return m_header[section]["index"]; // Index == database name
+        return tableHeader_[section]["index"]; // Index == database name
 
     if (role != Qt::DisplayRole)
         return {};
@@ -48,7 +48,7 @@ QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, in
     switch (orientation)
     {
         case Qt::Horizontal:
-            return m_header[section]["title"]; // Title == desired display name
+            return tableHeader_[section]["title"]; // Title == desired display name
         case Qt::Vertical:
             // return section + 1;
             return {};
@@ -57,13 +57,13 @@ QVariant JsonTableModel::headerData(int section, Qt::Orientation orientation, in
     }
 }
 
-int JsonTableModel::rowCount(const QModelIndex &parent) const { return m_json.size(); }
+int JsonTableModel::rowCount(const QModelIndex &parent) const { return tableJsonData_.size(); }
 
-int JsonTableModel::columnCount(const QModelIndex &parent) const { return m_header.size(); }
+int JsonTableModel::columnCount(const QModelIndex &parent) const { return tableHeader_.size(); }
 
-QJsonObject JsonTableModel::getJsonObject(const QModelIndex &index) const
+QJsonObject JsonTableModel::getJsonObject(const QModelIndex &index) const // Get row data
 {
-    const QJsonValue &value = m_json[index.row()];
+    const QJsonValue &value = tableJsonData_[index.row()];
     return value.toObject();
 }
 
@@ -74,7 +74,7 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
         return {};
 
     QJsonObject obj = getJsonObject(index);
-    const QString &key = m_header[index.column()]["index"];
+    const QString &key = tableHeader_[index.column()]["index"];
     if (!obj.contains(key))
         return {};
     QJsonValue v = obj[key];
@@ -85,7 +85,7 @@ QVariant JsonTableModel::data(const QModelIndex &index, int role) const
         return {};
 
     // if title = Run Numbers then format (for grouped data)
-    if (m_header[index.column()]["title"] == "Run Numbers")
+    if (tableHeader_[index.column()]["title"] == "Run Numbers")
     {
         // Format grouped runs display
         auto runArr = v.toString().split(";");
@@ -118,7 +118,7 @@ void JsonTableModel::groupData()
 
     // holds data in tuple as QJson referencing is incomplete
     std::vector<std::tuple<QString, QString, QString>> groupedData;
-    for (QJsonValue value : m_json)
+    for (QJsonValue value : tableJsonData_)
     {
         const QJsonObject &valueObj = value.toObject();
         bool unique = true;
@@ -150,29 +150,29 @@ void JsonTableModel::groupData()
         groupedJson.push_back(QJsonValue(groupData));
     }
     // Hold ungrouped values
-    m_holdJson = m_json;
-    m_holdHeader = m_header;
+    tableHoldJsonData_ = tableJsonData_;
+    tableHoldHeader_ = tableHeader_;
 
     // Get and assign array headers
-    setHeader(m_groupedHeader);
+    setHeader(tableGroupedHeader_);
     setJson(groupedJson);
 }
 
 // Apply held (ungrouped) values to table
 void JsonTableModel::unGroupData()
 {
-    setHeader(m_holdHeader);
-    setJson(m_holdJson);
+    setHeader(tableHoldHeader_);
+    setJson(tableHoldJsonData_);
 }
 
-void JsonTableModel::setColumnTitle(int section, QString title) { m_header[section]["index"] = title; }
+void JsonTableModel::setColumnTitle(int section, QString title) { tableHeader_[section]["index"] = title; }
 
 bool JsonTableModel::setData(const QModelIndex &index, QJsonObject rowData, int role)
 {
     if (index.isValid() && role == Qt::EditRole)
     {
         const int row = index.row();
-        m_json[row] = rowData;
+        tableJsonData_[row] = rowData;
         emit dataChanged(index, index.siblingAtColumn(rowData.count()), {Qt::DisplayRole, Qt::EditRole});
         return true;
     }
@@ -185,7 +185,7 @@ bool JsonTableModel::insertRows(int row, int count, const QModelIndex &parent)
     emit layoutAboutToBeChanged();
     beginInsertRows(parent, row, row + count);
     for (int position = 0; position < count; ++position)
-        m_json.insert(row, QJsonValue());
+        tableJsonData_.insert(row, QJsonValue());
     endInsertRows();
     emit layoutChanged();
     return true;

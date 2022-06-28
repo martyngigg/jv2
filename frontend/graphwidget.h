@@ -41,8 +41,8 @@ class GraphWidget : public QWidget
     void getBinWidths();
 
     private slots:
-    void runDivideSpinHandling();
-    void monDivideSpinHandling();
+    void runDivideSpinHandling(); // Handle normalisation conflicts
+    void monDivideSpinHandling(); // Handle normalisation conflicts
     void on_countsPerMicrosecondCheck_stateChanged(int state);
     void on_countsPerMicroAmpCheck_stateChanged(int state);
 

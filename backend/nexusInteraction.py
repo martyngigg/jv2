@@ -37,7 +37,6 @@ def file(instrument, cycle, run):
             for directory in dir:
                 if directory[:5] == "cycle":
                     cycles.append(directory)
-
     nxsDir = ""
     for cycleValue in cycles:
         nxsRoot = "/{}/NDX{}/Instrument/data/{}/".format(
@@ -208,7 +207,7 @@ def detectorAnalysis(instrument, cycle, run):
 if __name__ == '__main__':
     print("activated")
     setRoot("Default")
-    nxsFile = file("nimrod", "", "71158")
+    nxsFile = file("nimrod", "cycle_20_3", "71158")
     mainGroup = nxsFile['raw_data_1']
     for value in mainGroup['monitor_8']['data'][0][0]:
         if (value > 0):

@@ -33,6 +33,9 @@ class ChartView : public QChartView
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
+    private slots:
+    void setGraphics(QChart *chart);
+
     private:
     QPointF lastMousePos_;
     QString hovered_;

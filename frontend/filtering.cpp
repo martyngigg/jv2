@@ -37,7 +37,6 @@ void MainWindow::on_filterBox_textChanged(const QString &arg1)
 {
     proxyModel_->setFilterString(arg1.trimmed());
     proxyModel_->setFilterKeyColumn(-1);
-    proxyModel_->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
     // Update search to new data
     if (searchString_ != "")
@@ -116,7 +115,7 @@ void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
     setLoadScreen(false);
     QString msg;
 
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
         if (worker->response == "Not Found")
         {
@@ -138,7 +137,7 @@ void MainWindow::goTo(HttpRequestWorker *worker, QString runNumber)
     else
     {
         // an error occurred
-        msg = "Error1: " + worker->error_str;
+        msg = "Error1: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }

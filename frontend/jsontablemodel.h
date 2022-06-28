@@ -25,7 +25,7 @@ class JsonTableModel : public QAbstractTableModel
     bool setHeader(const Header &array);
     Header getHeader();
 
-    virtual QJsonObject getJsonObject(const QModelIndex &index) const;
+    virtual QJsonObject getJsonObject(const QModelIndex &index) const; // get row data
 
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -38,11 +38,11 @@ class JsonTableModel : public QAbstractTableModel
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
     private:
-    Header m_header;
-    Header m_holdHeader;
-    Header m_groupedHeader;
-    QJsonArray m_json;
-    QJsonArray m_holdJson;
+    Header tableHeader_;
+    Header tableHoldHeader_;
+    Header tableGroupedHeader_;
+    QJsonArray tableJsonData_;
+    QJsonArray tableHoldJsonData_;
 };
 
 #endif // JSONTABLEMODEL_H

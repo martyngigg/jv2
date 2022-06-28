@@ -22,18 +22,7 @@ ChartView::ChartView(QChart *chart, QWidget *parent) : QChartView(chart, parent)
     setDragMode(QGraphicsView::NoDrag);
     this->setMouseTracking(true);
     hovered_ = "";
-    coordLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
-    coordLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
-    coordStartLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
-    coordStartLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
-    coordLabelX_->setBrush(QColor(0, 0, 0, 127));
-    coordLabelY_->setBrush(QColor(0, 0, 0, 127));
-    coordLabelX_->setFont(QFont("Helvetica", 8));
-    coordLabelY_->setFont(QFont("Helvetica", 8));
-    coordStartLabelX_->setBrush(QColor(0, 0, 0, 127));
-    coordStartLabelY_->setBrush(QColor(0, 0, 0, 127));
-    coordStartLabelX_->setFont(QFont("Helvetica", 8));
-    coordStartLabelY_->setFont(QFont("Helvetica", 8));
+    this->setGraphics(chart);
 }
 
 ChartView::ChartView(QWidget *parent) : QChartView(parent)
@@ -44,9 +33,8 @@ ChartView::ChartView(QWidget *parent) : QChartView(parent)
     hovered_ = "";
 }
 
-void ChartView::assignChart(QChart *chart)
+void ChartView::setGraphics(QChart *chart)
 {
-    this->setChart(chart);
     coordLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
     coordLabelY_ = new QGraphicsSimpleTextItem(nullptr, chart);
     coordStartLabelX_ = new QGraphicsSimpleTextItem(nullptr, chart);
@@ -60,14 +48,19 @@ void ChartView::assignChart(QChart *chart)
     coordStartLabelX_->setFont(QFont("Helvetica", 8));
     coordStartLabelY_->setFont(QFont("Helvetica", 8));
 }
+void ChartView::assignChart(QChart *chart)
+{
+    this->setChart(chart);
+    this->setGraphics(chart);
+}
 
 void ChartView::addSeries(HttpRequestWorker *worker)
 {
     QString msg;
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
         // For each Run
-        auto array = worker->json_array;
+        auto array = worker->jsonArray;
         array.removeFirst();
         foreach (const auto &runFields, array)
         {
@@ -85,8 +78,6 @@ void ChartView::addSeries(HttpRequestWorker *worker)
 
                 connect(series, &QLineSeries::hovered,
                         [=](const QPointF point, bool hovered) { this->setHovered(point, hovered, series->name()); });
-                // connect(this, SIGNAL(showCoordinates(qreal, qreal, QString)), this, SLOT(showStatus(qreal, qreal, QString)));
-                // connect(this, SIGNAL(clearCoordinates()), statusBar(), SLOT(clearMessage()));
 
                 // Set dateSeries ID
                 QString name = fieldDataArray.first()[0].toString();
@@ -96,11 +87,10 @@ void ChartView::addSeries(HttpRequestWorker *worker)
 
                 foreach (const auto &dataPair, fieldDataArray)
                 {
-                    // qobject_cast<QValueAxis *>(chart()->axes(Qt::Horizontal)[0]);
                     auto dataPairArray = dataPair.toArray();
                     if (chart()->axes(Qt::Horizontal)[0]->type() == QAbstractAxis::AxisTypeValue)
                         series->append(dataPairArray[0].toDouble(), dataPairArray[1].toDouble());
-                    else
+                    else // if date time axis
                         series->append(startTime.addSecs(dataPairArray[0].toDouble()).toMSecsSinceEpoch(),
                                        dataPairArray[1].toDouble());
 
@@ -135,7 +125,7 @@ void ChartView::addSeries(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }

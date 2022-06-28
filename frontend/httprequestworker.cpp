@@ -25,8 +25,8 @@ void HttpRequestWorker::execute(HttpRequestInput input)
 
     // reset variables
     response = "";
-    error_type = QNetworkReply::NoError;
-    error_str = "";
+    errorType = QNetworkReply::NoError;
+    errorString = "";
 
     // execute connection
     QNetworkRequest request = QNetworkRequest(QUrl(input.url_str));
@@ -37,15 +37,15 @@ void HttpRequestWorker::execute(HttpRequestInput input)
 // Process request
 void HttpRequestWorker::on_manager_finished(QNetworkReply *reply)
 {
-    error_type = reply->error();
-    if (error_type == QNetworkReply::NoError)
+    errorType = reply->error();
+    if (errorType == QNetworkReply::NoError)
     {
         response = reply->readAll();
         jsonResponse = QJsonDocument::fromJson(response.toUtf8());
-        json_array = jsonResponse.array();
+        jsonArray = jsonResponse.array();
     }
     else
-        error_str = reply->errorString();
+        errorString = reply->errorString();
 
     reply->deleteLater();
 

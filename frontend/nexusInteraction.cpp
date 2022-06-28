@@ -22,6 +22,7 @@
 #include <QWidgetAction>
 #include <algorithm>
 
+// Collect plot options and display menu
 void MainWindow::customMenuRequested(QPoint pos)
 {
     pos_ = pos;
@@ -51,11 +52,11 @@ void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
 {
     QString msg;
 
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
         contextMenu_->clear();
 
-        foreach (const auto &log, worker->json_array)
+        foreach (const auto &log, worker->jsonArray)
         {
             auto logArray = log.toArray();
             auto name = logArray.first().toString().toUpper();
@@ -81,6 +82,7 @@ void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
             }
         }
 
+        // Additional context options
         auto *action = new QAction("Select runs with same title", this);
         connect(action, SIGNAL(triggered()), this, SLOT(selectSimilar()));
         contextMenu_->addAction(action);
@@ -96,11 +98,12 @@ void MainWindow::handle_result_contextMenu(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }
 
+// Returns run and cycle values for selected runs
 QString MainWindow::getRunNos()
 {
     // Gathers all selected runs
@@ -161,7 +164,8 @@ void MainWindow::contextGraph()
 
     auto runNos = getRunNos().split("-")[0];
     auto cycles = getRunNos().split("-")[1];
-    if (cycles == "")
+
+    if (cycles == "") // Handle unavailable cycle data
     {
         for (auto run : runNos.split(";"))
             cycles.append(" ;");
@@ -184,7 +188,7 @@ void MainWindow::contextGraph()
     worker->execute(input);
 }
 
-// Handles log data
+// Configure and populate graphing window
 void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
 {
     setLoadScreen(false);
@@ -196,9 +200,9 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
     auto *fieldsMenu = new QMenu("fieldsMenu", window);
 
     QString msg;
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
-        foreach (const QJsonValue &log, worker->json_array[0].toArray())
+        foreach (const QJsonValue &log, worker->jsonArray[0].toArray())
         {
             auto logArray = log.toArray();
             auto name = logArray.first().toString().toUpper();
@@ -224,7 +228,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
             }
         }
 
-        worker->json_array.removeFirst();
+        worker->jsonArray.removeFirst();
         auto *timeAxis = new QDateTimeAxis();
         timeAxis->setFormat("yyyy-MM-dd<br>H:mm:ss");
         dateTimeChart->addAxis(timeAxis, Qt::AlignBottom);
@@ -246,7 +250,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
         QList<QString> chartFields;
         bool firstRun = true;
         // For each Run
-        foreach (const auto &runFields, worker->json_array)
+        foreach (const auto &runFields, worker->jsonArray)
         {
             auto runFieldsArray = runFields.toArray();
 
@@ -437,7 +441,7 @@ void MainWindow::handle_result_contextGraph(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }
@@ -465,7 +469,7 @@ void MainWindow::toggleAxis(int state)
 
 void MainWindow::getField()
 {
-    auto *action = qobject_cast<QAction *>(sender()); // ACTION DOES NOT BELONG TO TAB
+    auto *action = qobject_cast<QAction *>(sender());
     auto *graphParent = ui_->tabWidget->currentWidget();
     auto tabCharts = graphParent->findChildren<QChartView *>();
 
@@ -518,9 +522,9 @@ void MainWindow::handleSpectraCharting(HttpRequestWorker *worker)
     ChartView *chartView = window->getChartView();
 
     QString msg;
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
-        auto workerArray = worker->json_array;
+        auto workerArray = worker->jsonArray;
         QString field = "Detector ";
         auto metaData = workerArray[0].toArray();
         QString runs = metaData[0].toString();
@@ -578,7 +582,7 @@ void MainWindow::handleSpectraCharting(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }
@@ -593,9 +597,9 @@ void MainWindow::handleMonSpectraCharting(HttpRequestWorker *worker)
     ChartView *chartView = window->getChartView();
 
     QString msg;
-    if (worker->error_type == QNetworkReply::NoError)
+    if (worker->errorType == QNetworkReply::NoError)
     {
-        auto workerArray = worker->json_array;
+        auto workerArray = worker->jsonArray;
         QString field = "Monitor ";
         auto metaData = workerArray[0].toArray();
         QString runs = metaData[0].toString();
@@ -642,7 +646,7 @@ void MainWindow::handleMonSpectraCharting(HttpRequestWorker *worker)
     else
     {
         // an error occurred
-        msg = "Error2: " + worker->error_str;
+        msg = "Error2: " + worker->errorString;
         QMessageBox::information(this, "", msg);
     }
 }

@@ -48,8 +48,9 @@ void MainWindow::initialiseElements()
     auto instruments = getInstruments();
     fillInstruments(instruments);
 
-    // First Iteration variable for set-up commands
+    // Define initial variable states
     init_ = true;
+    searchString_ = "";
 
     // View menu for column toggles
     viewMenu_ = ui_->menubar->addMenu("View");
@@ -59,6 +60,7 @@ void MainWindow::initialiseElements()
     ui_->runDataTable->horizontalHeader()->setDragEnabled(true);
     ui_->runDataTable->setAlternatingRowColors(true);
     ui_->runDataTable->setStyleSheet("alternate-background-color: #e7e7e6;");
+    ui_->runDataTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
     // Sets instrument to last used
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ISIS", "jv2");
@@ -83,12 +85,10 @@ void MainWindow::initialiseElements()
     connect(ui_->runDataTable, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
     contextMenu_ = new QMenu("Context");
 
+    // Connect exit action
     connect(ui_->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
 
-    searchString_ = "";
-
-    ui_->runDataTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-
+    // Tests and assigns local sources from memory
     QString localSource = settings.value("localSource").toString();
     QString url_str;
     validSource_ = true;
@@ -186,6 +186,7 @@ void MainWindow::massSearch(QString name, QString value)
     QString textInput;
     QString text;
     name.append(": ");
+    // configure for ranges
     if (name == "Run Range: ")
         prompt = "StartRun-EndRun:";
     else if (name == "Date Range: ")
@@ -233,12 +234,14 @@ void MainWindow::massSearch(QString name, QString value)
             return;
         }
     }
+    // mass search for data
     QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput;
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));
     worker->execute(input);
 
+    // configure caching
     cachedMassSearch_.append(std::make_tuple(worker, text));
 
     auto *action = new QAction("[" + text + "]", this);
@@ -523,7 +526,7 @@ void MainWindow::refresh(QString status)
     {
         qDebug() << "Update";
         currentInstrumentChanged(instName_);
-        if (cyclesMap_[cyclesMenu_->actions()[0]->text()] != status)
+        if (cyclesMap_[cyclesMenu_->actions()[0]->text()] != status) // if new cycle found
         {
             auto displayName = "Cycle " + status.split("_")[1] + "/" + status.split("_")[2].remove(".xml");
             cyclesMap_[displayName] = status;
@@ -532,7 +535,7 @@ void MainWindow::refresh(QString status)
             connect(action, &QAction::triggered, [=]() { changeCycle(displayName); });
             cyclesMenu_->insertAction(cyclesMenu_->actions()[0], action);
         }
-        else if (cyclesMap_[ui_->cycleButton->text()] == status)
+        else if (cyclesMap_[ui_->cycleButton->text()] == status) // if current opened cycle changed
         {
             QString url_str = "http://127.0.0.1:5000/updateJournal/" + instName_ + "/" + status + "/" +
                               model_->getJsonObject(model_->index(model_->rowCount() - 1, 0))["run_number"].toString();
@@ -552,7 +555,7 @@ void MainWindow::refresh(QString status)
 
 void MainWindow::update(HttpRequestWorker *worker)
 {
-    for (auto row : worker->json_array)
+    for (auto row : worker->jsonArray)
     {
         auto rowObject = row.toObject();
         model_->insertRows(model_->rowCount(), 1);

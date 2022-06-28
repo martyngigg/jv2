@@ -204,7 +204,8 @@ def getAllJournals(instrument, search):
         """
         print("TEST " + search.lower())
         path = "//*[contains(translate(data:user_name/text(), " + \
-            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + \
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', " + \
+            "'abcdefghijklmnopqrstuvwxyz'),'" + \
             search.lower()+"')]"
         foundElems = root.xpath(path, namespaces=nameSpace)
         for element in foundElems:

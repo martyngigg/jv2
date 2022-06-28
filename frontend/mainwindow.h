@@ -88,6 +88,11 @@ class MainWindow : public QMainWindow
     void getSpectrumCount();
     void getMonitorCount();
 
+    // Normalisation options
+    void muAmps(QString runs, bool checked, QString);
+    void runDivide(QString currentDetector, QString run, bool checked);
+    void monDivide(QString currentRun, QString mon, bool checked);
+
     // Misc Interface Functions
     void removeTab(int index);
     void savePref();
@@ -96,10 +101,6 @@ class MainWindow : public QMainWindow
 
     void on_actionMountPoint_triggered();
     void on_actionClearMountPoint_triggered();
-
-    void muAmps(QString runs, bool checked, QString);
-    void runDivide(QString currentDetector, QString run, bool checked);
-    void monDivide(QString currentRun, QString mon, bool checked);
 
     void refresh(QString Status);
     void update(HttpRequestWorker *worker);

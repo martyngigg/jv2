@@ -108,6 +108,9 @@ void MainWindow::handle_result_cycles(HttpRequestWorker *worker)
         model_ = new JsonTableModel(header_, this);
         proxyModel_ = new MySortFilterProxyModel(this);
         proxyModel_->setSourceModel(model_);
+        connect(ui_->caseSensitivityButton, SIGNAL(clicked(bool)), proxyModel_, SLOT(toggleCaseSensitivity(bool)));
+        connect(proxyModel_, &MySortFilterProxyModel::updateFilter,
+                [=]() { on_filterBox_textChanged(ui_->filterBox->text()); }); // refresh filter on toggle
         ui_->runDataTable->setModel(proxyModel_);
         model_->setJson(jsonArray);
         ui_->runDataTable->show();

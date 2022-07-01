@@ -185,6 +185,7 @@ void MainWindow::massSearch(QString name, QString value)
     const char *prompt;
     QString textInput;
     QString text;
+    bool caseSensitivity = false;
     name.append(": ");
     // configure for ranges
     if (name == "Run Range: ")
@@ -216,7 +217,29 @@ void MainWindow::massSearch(QString name, QString value)
             return;
     }
     else
-        textInput = QInputDialog::getText(this, tr("Find"), tr(prompt), QLineEdit::Normal);
+    {
+        QDialog dialog(this);
+        QFormLayout form(&dialog);
+
+        form.addRow(new QLabel(name));
+        QLineEdit *input = new QLineEdit(&dialog);
+        form.addRow(name, input);
+        QCheckBox *caseSensitive = new QCheckBox(&dialog);
+        form.addRow("Case sensitive", caseSensitive);
+
+        QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+        form.addRow(&buttonBox);
+        QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+        QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+        if (dialog.exec() == QDialog::Accepted)
+        {
+            textInput = input->text();
+            caseSensitivity = caseSensitive->isChecked();
+        }
+        else
+            return;
+    }
     text = name.append(textInput);
     textInput.replace("/", ";");
     if (textInput.isEmpty())
@@ -235,7 +258,11 @@ void MainWindow::massSearch(QString name, QString value)
         }
     }
     // mass search for data
-    QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput;
+    QString searchOptions;
+    QString sensitivityText = "caseSensitivity=";
+    sensitivityText.append(caseSensitivity ? "true" : "false");
+    searchOptions.append(sensitivityText);
+    QString url_str = "http://127.0.0.1:5000/getAllJournals/" + instName_ + "/" + value + "/" + textInput + "/" + searchOptions;
     HttpRequestInput input(url_str);
     auto *worker = new HttpRequestWorker(this);
     connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker *)), this, SLOT(handle_result_cycles(HttpRequestWorker *)));

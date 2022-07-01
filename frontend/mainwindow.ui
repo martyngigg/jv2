@@ -118,7 +118,7 @@
                   <string>Group</string>
                  </property>
                  <property name="icon">
-                  <iconset>
+                  <iconset resource="icons.qrc">
                    <normaloff>:/group.svg</normaloff>:/group.svg</iconset>
                  </property>
                  <property name="checkable">
@@ -144,9 +144,31 @@
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>:/filter.svg</pixmap>
+                  <pixmap resource="icons.qrc">:/filter.svg</pixmap>
                  </property>
                  <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="caseSensitivityButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>22</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Aa</string>
+                 </property>
+                 <property name="checkable">
                   <bool>true</bool>
                  </property>
                 </widget>
@@ -182,7 +204,7 @@
                   <string/>
                  </property>
                  <property name="icon">
-                  <iconset>
+                  <iconset resource="icons.qrc">
                    <normaloff>:/cross.svg</normaloff>:/cross.svg</iconset>
                  </property>
                 </widget>
@@ -377,6 +399,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

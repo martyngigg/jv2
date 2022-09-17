@@ -1,0 +1,49 @@
+Bootstrap: localimage
+From: ./jv2-build.sif
+Stage: build
+
+Bootstrap: library
+From: ubuntu:jammy
+Stage: final
+
+%files from build
+    /var/jv2/build/bin/jv2 /opt/jv2/bin/jv2
+
+%post
+    # Install mimimal X libraries for application
+    # List compiled from output of 'ldd /opt/jv2/bin/jv2'
+    apt update && apt -y install --no-install-recommends \
+        chrpath \
+        fontconfig-config \
+        libx11-xcb1 \
+        libice6 \
+        libsm6 \
+        libxcb-icccm4 \
+        libxcb-image0 \
+        libxcb-keysyms1 \
+        libxcb-randr0 \
+        libxcb-render-util0 \
+        libxcb-render0 \
+        libxcb-shape0 \
+        libxcb-sync1 \
+        libxcb-xfixes0 \
+        libxcb-xkb1 \
+        libgl1 \
+        libstdc++6
+    rm -r /var/lib/apt/lists/*
+
+    # Remove RPATH pointing to conan
+    chrpath --delete /opt/jv2/bin/jv2
+
+    # Remove utility
+    apt purge -y chrpath
+
+%environment
+    export FONTCONFIG_PATH=/etc/fonts
+    export LC_ALL=${LC_ALL:-'C'}
+
+%runscript
+    # Disable session management as it causes a Qt warning:
+    #   Qt: Session management error: None of the authentication protocols specified are supported
+    unset SESSION_MANAGER
+    /opt/jv2/bin/jv2

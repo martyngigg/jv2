@@ -6,12 +6,15 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_run(
   REQUIRES
     qt/6.3.1
-    openssl/1.1.1q
+    fontconfig/2.13.93
     glib/2.73.1
+    openssl/1.1.1q
   BASIC_SETUP CMAKE_TARGETS
   GENERATORS cmake_find_package cmake_paths
   BUILD missing
   OPTIONS
     qt:shared=False qt:qtcharts=True
-    glib:shared=False)
+    glib:shared=False
+    fontconfig:shared=False
+)
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)

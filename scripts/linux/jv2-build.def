@@ -1,0 +1,23 @@
+Bootstrap: library
+From: ubuntu:jammy
+Stage: build
+
+%files
+    # Copy source from host. Assume build is run from directory of this definition
+    ../../ /var/jv2
+
+%post
+    export LC_ALL=C
+    export DEBIAN_FRONTEND=noninteractive
+    # keep conan data in container
+    export CONAN_USER_HOME=/var/conan
+
+    mkdir ${CONAN_USER_HOME}
+    cd /var/jv2
+    scripts/linux/setup-for-development-ubuntu.sh && rm -r /var/lib/apt/lists/*
+    # build
+    mkdir build && cd build
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      -B . -S ../
+    cmake --build .

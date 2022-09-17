@@ -31,6 +31,7 @@ run_elevated apt -y install --no-install-recommends \
   gpg \
   g++ \
   libgl-dev \
+  make \
   ninja-build \
   pkg-config \
   python3-setuptools \

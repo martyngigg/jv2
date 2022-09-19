@@ -16,7 +16,6 @@ set(VERSION_PATCH "0")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -46,25 +45,25 @@ find_package(
 
 # Common sources
 set(PROJECT_SOURCES
-    frontend/main.cpp
-    frontend/mainwindow.cpp
-    frontend/filtering.cpp
-    frontend/datagathering.cpp
-    frontend/searching.cpp
-    frontend/nexusInteraction.cpp
-    frontend/mainwindow.h
-    frontend/mainwindow.ui
-    frontend/httprequestworker.cpp
-    frontend/httprequestworker.h
-    frontend/jsontablemodel.cpp
-    frontend/jsontablemodel.h
-    frontend/chartview.cpp
-    frontend/chartview.h
-    frontend/graphwidget.cpp
-    frontend/graphwidget.h
-    frontend/graphwidget.ui
-    frontend/mysortfilterproxymodel.cpp
-    frontend/mysortfilterproxymodel.h)
+    src/main.cpp
+    src/mainwindow.cpp
+    src/filtering.cpp
+    src/datagathering.cpp
+    src/searching.cpp
+    src/nexusInteraction.cpp
+    src/mainwindow.h
+    src/mainwindow.ui
+    src/httprequestworker.cpp
+    src/httprequestworker.h
+    src/jsontablemodel.cpp
+    src/jsontablemodel.h
+    src/chartview.cpp
+    src/chartview.h
+    src/graphwidget.cpp
+    src/graphwidget.h
+    src/graphwidget.ui
+    src/mysortfilterproxymodel.cpp
+    src/mysortfilterproxymodel.h)
 
 # OS-dependent flags
 if(MSVC)
@@ -94,15 +93,16 @@ elseif()
   find_package(GLUT REQUIRED)
 else()
   if(JV2_USE_CONAN)
-    list(APPEND PROJECT_SOURCES frontend/platforminit.cpp)
+    list(APPEND PROJECT_SOURCES src/platforminit.cpp)
     set(STATIC_PLATFORM_PLUGINS Qt6::QXcbIntegrationPlugin Qt6::XcbQpaPrivate)
   endif()
 endif()
 
 # Resources
-set(jv2_RES_QRC "frontend/icons.qrc")
+set(jv2_RES_QRC "src/icons.qrc")
 
 qt6_add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES} ${jv2_RES_QRC})
+target_include_directories(jv2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 target_link_libraries(jv2
   PRIVATE
     Qt6::Core Qt6::Widgets  Qt6::Network Qt6::Charts Qt6::Xml Qt6::OpenGLWidgets

@@ -57,7 +57,7 @@
             pname = exe-name mpi gui;
             src =
               builtins.filterSource (path: type: baseNameOf path != "flake.nix")
-              ./.;
+              ./frontend;
             patches = [ ./nix/patches/ctest.patch ];
             buildInputs = base_libs pkgs ++ pkgs.lib.optional mpi pkgs.openmpi
               ++ pkgs.lib.optionals gui (gui_libs pkgs)
@@ -82,7 +82,7 @@
               mkdir -p $out/bin
               ls -R
               cp -R ./jv2 $out/bin/
-              
+
             '';
 
             meta = with pkgs.lib; {

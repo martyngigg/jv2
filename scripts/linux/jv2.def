@@ -7,10 +7,10 @@ From: ubuntu:jammy
 Stage: final
 
 %files from build
-    /var/jv2/build/bin/jv2 /opt/jv2/bin/jv2
+    /var/jv2/frontend/build/bin/jv2 /opt/jv2/bin/jv2
 
 %post
-    # Install mimimal X libraries for application
+    # Install mimimal X libraries for frontend application
     # List compiled from output of 'ldd /opt/jv2/bin/jv2'
     apt update && apt -y install --no-install-recommends \
         chrpath \

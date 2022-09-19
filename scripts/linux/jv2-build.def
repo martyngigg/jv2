@@ -11,11 +11,14 @@ Stage: build
     export DEBIAN_FRONTEND=noninteractive
     # keep conan data in container
     export CONAN_USER_HOME=/var/conan
-
     mkdir ${CONAN_USER_HOME}
+
+    # Install base development libraries
     cd /var/jv2
     scripts/linux/setup-for-development-ubuntu.sh && rm -r /var/lib/apt/lists/*
-    # build
+
+    # Frontend
+    cd /var/jv2/frontend
     mkdir build && cd build
     cmake -G Ninja -DJV2_USE_CONAN=ON -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=/usr/local \

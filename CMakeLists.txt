@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(
   jv2
@@ -24,8 +24,13 @@ set(CMAKE_AUTORCC ON)
 # Custom CMake modules
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
+# Configure options
+option(JV2_USE_CONAN "If True, use the Conan package manager" OFF)
+
 # Setup Conan for dependency management
-include(conan-jv2)
+if(JV2_USE_CONAN)
+  include(conan-jv2)
+endif()
 
 find_package(
   Qt6
@@ -88,7 +93,10 @@ elseif()
   add_definitions(-D_MAC)
   find_package(GLUT REQUIRED)
 else()
-  list(APPEND PROJECT_SOURCES frontend/platforminit.cpp)
+  if(JV2_USE_CONAN)
+    list(APPEND PROJECT_SOURCES frontend/platforminit.cpp)
+    set(STATIC_PLATFORM_PLUGINS Qt6::QXcbIntegrationPlugin Qt6::XcbQpaPrivate)
+  endif()
 endif()
 
 # Resources
@@ -98,7 +106,7 @@ qt6_add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES} ${jv2_RES_QRC})
 target_link_libraries(jv2
   PRIVATE
     Qt6::Core Qt6::Widgets  Qt6::Network Qt6::Charts Qt6::Xml Qt6::OpenGLWidgets
-    Qt6::QXcbIntegrationPlugin Qt6::XcbQpaPrivate
+    ${STATIC_PLATFORM_PLUGINS}
 )
 
 set_target_properties(

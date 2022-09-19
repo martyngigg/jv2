@@ -17,7 +17,7 @@ Stage: build
     scripts/linux/setup-for-development-ubuntu.sh && rm -r /var/lib/apt/lists/*
     # build
     mkdir build && cd build
-    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    cmake -G Ninja -DJV2_USE_CONAN=ON -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       -B . -S ../
     cmake --build .

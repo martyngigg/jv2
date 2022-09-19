@@ -17,7 +17,7 @@ from datetime import timedelta
 
 import requests
 
-import nexusInteraction
+from . import nexusInteraction
 
 from os import path
 
@@ -528,6 +528,11 @@ def shutdown():
     shutdown_server()
     return jsonify({"response": "Server shut down"})
 
-
-if __name__ == '__main__':
+def main():
+    """Start the flask server with default settings"""
     app.run()
+
+
+# Start server when executed as a main routine
+if __name__ == '__main__':
+    main()

@@ -8,8 +8,12 @@ Stage: final
 
 %files from build
     /var/jv2/frontend/build/bin/jv2 /opt/jv2/bin/jv2
+    /var/jv2/backend/wheels/jv2backend*.whl /var/wheels/
 
 %post
+    export LC_ALL=C
+    export DEBIAN_FRONTEND=noninteractive
+
     # Install mimimal X libraries for frontend application
     # List compiled from output of 'ldd /opt/jv2/bin/jv2'
     apt update && apt -y install --no-install-recommends \
@@ -30,19 +34,28 @@ Stage: final
         libxcb-xkb1 \
         libgl1 \
         libstdc++6
+    # Install Python
+    apt install -y --no-install-recommends \
+        python3-setuptools \
+        python3-pip \
+        python3-wheel
     rm -r /var/lib/apt/lists/*
 
     # Remove RPATH pointing to conan
     chrpath --delete /opt/jv2/bin/jv2
-
     # Remove utility
     apt purge -y chrpath
+
+    # Install backend
+    python3 -m pip install --prefix=/opt/jv2 /var/wheels/*
 
 %environment
     export FONTCONFIG_PATH=/etc/fonts
     export LC_ALL=${LC_ALL:-'C'}
 
 %runscript
+    # Start backend
+    /opt/jv2/bin/jv2backend
     # Disable session management as it causes a Qt warning:
     #   Qt: Session management error: None of the authentication protocols specified are supported
     unset SESSION_MANAGER

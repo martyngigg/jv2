@@ -24,3 +24,7 @@ Stage: build
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       -B . -S ../
     cmake --build .
+
+    # Backend
+    cd /var/jv2/backend
+    python3 -m pip wheel --wheel-dir=wheels .

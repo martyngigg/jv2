@@ -7,12 +7,21 @@ From: ubuntu:jammy
 Stage: final
 
 %files from build
-    /var/jv2/frontend/build/bin/jv2 /opt/jv2/bin/jv2
+    /var/jv2/frontend/build/bin/jv2 /opt/jv2/local/bin/
     /var/jv2/backend/wheels/jv2backend*.whl /var/wheels/
 
+%environment
+    export FONTCONFIG_PATH=/etc/fonts
+    export LC_ALL=${LC_ALL:-'C'}
+
 %post
+    # Build variables
     export LC_ALL=C
     export DEBIAN_FRONTEND=noninteractive
+    export JV2_PIP_PREFIX=/opt/jv2
+    export JV2_INSTALL_PREFIX=${JV2_PIP_PREFIX}/local
+    export PATH=${JV2_INSTALL_PREFIX}/bin:${PATH}
+
 
     # Install mimimal X libraries for frontend application
     # List compiled from output of 'ldd /opt/jv2/bin/jv2'
@@ -42,21 +51,26 @@ Stage: final
     rm -r /var/lib/apt/lists/*
 
     # Remove RPATH pointing to conan
-    chrpath --delete /opt/jv2/bin/jv2
+    chrpath --delete ${JV2_INSTALL_PREFIX}/bin/jv2
     # Remove utility
     apt purge -y chrpath
 
     # Install backend
-    python3 -m pip install --prefix=/opt/jv2 /var/wheels/*
+    python3 -m pip install --prefix=${JV2_PIP_PREFIX} /var/wheels/*
+    rm -fr /var/wheels
 
-%environment
-    export FONTCONFIG_PATH=/etc/fonts
-    export LC_ALL=${LC_ALL:-'C'}
+    # Runtime variables
+    # Configure Python to search in /opt - just switch out the /usr prefix with /opt/jv2
+    opt_python_purelib=$(python3 -c "import sysconfig;print(sysconfig.get_path('platlib').replace('/usr', '/opt/jv2'))")
+    echo "export PYTHONPATH=\"${opt_python_purelib}\"" >> $SINGULARITY_ENVIRONMENT
+    # Add opt to PATH
+    echo "export PATH=\"${JV2_INSTALL_PREFIX}/bin:${PATH}\"" >> $SINGULARITY_ENVIRONMENT
 
 %runscript
-    # Start backend
-    /opt/jv2/bin/jv2backend
+    # Start backend. Small wait to bring up server
+    jv2backend &
+    sleep 1
     # Disable session management as it causes a Qt warning:
     #   Qt: Session management error: None of the authentication protocols specified are supported
     unset SESSION_MANAGER
-    /opt/jv2/bin/jv2
+    jv2

@@ -10,6 +10,9 @@ Stage: final
     /var/jv2/frontend/build/bin/jv2 /opt/jv2/local/bin/
     /var/jv2/backend/wheels/jv2backend*.whl /var/wheels/
 
+%files
+    ./jv2gui /opt/jv2/local/bin/jv2gui
+
 %environment
     export FONTCONFIG_PATH=/etc/fonts
     export LC_ALL=${LC_ALL:-'C'}
@@ -21,7 +24,6 @@ Stage: final
     export JV2_PIP_PREFIX=/opt/jv2
     export JV2_INSTALL_PREFIX=${JV2_PIP_PREFIX}/local
     export PATH=${JV2_INSTALL_PREFIX}/bin:${PATH}
-
 
     # Install mimimal X libraries for frontend application
     # List compiled from output of 'ldd /opt/jv2/bin/jv2'
@@ -67,10 +69,8 @@ Stage: final
     echo "export PATH=\"${JV2_INSTALL_PREFIX}/bin:${PATH}\"" >> $SINGULARITY_ENVIRONMENT
 
 %runscript
-    # Start backend. Small wait to bring up server
-    jv2backend &
-    sleep 1
     # Disable session management as it causes a Qt warning:
     #   Qt: Session management error: None of the authentication protocols specified are supported
     unset SESSION_MANAGER
-    jv2
+
+    jv2gui

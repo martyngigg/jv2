@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Launch script to wrap starting the backend & frontend.
+# Ensures the server shutsdown when the GUI exits
+# The backend is spun up using waitress
+
+# constants
+LISTEN_ADDR=127.0.0.1:5000
+
+# global variable
+BACKEND_PID=
+
+
+# -------------------- functions ---------------
+
+# Stop the backend at the given pid
+backend-stop() {
+  local pid=$BACKEND_PID
+  if [ -z "${pid}" ]; then
+    echo "Unable to stop backend process: Backend PID has not been captured."
+    echo "The process is likely still running..."
+    return
+  fi
+  echo "Stopping backend at pid ${pid}"
+  kill -s SIGINT "${pid}"
+}
+
+# -------------------- start ---------------
+# Add a trap to ensure the backend is shutdown however the scripts exits
+trap backend-stop EXIT
+
+# We can't wrap this line in a function as we need to directly capture the PID
+gunicorn --bind "${LISTEN_ADDR}" --workers 1 "jv2backend.isisInternal:create_app()" &
+BACKEND_PID=$!
+echo "Started backend on process ${BACKEND_PID}"
+
+# start gui and wait (brief pause to allow server to start)
+sleep 1
+jv2

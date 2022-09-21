@@ -528,8 +528,12 @@ def shutdown():
     shutdown_server()
     return jsonify({"response": "Server shut down"})
 
+def create_app():
+    """Return the flask app to an external WSGI server"""
+    return app
+
 def main():
-    """Start the flask server with default settings"""
+    """Start the flask development server with default settings"""
     app.run()
 
 

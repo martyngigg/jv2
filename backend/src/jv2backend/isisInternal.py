@@ -21,24 +21,32 @@ from . import nexusInteraction
 
 from os import path
 
-app = Flask(__name__)
-
+# Constants
 dataLocation = "http://data.isis.rl.ac.uk/journals/"
-
 localSource = ""
 
-# Shutdown flask server
+# Global Flask application instance
+app = None
 
+def create_app():
+    """Create and return the flask app """
+    globals app
+    app = Flask(__name__)
+    return app
 
 def shutdown_server():
+    """Shutdown a local flask server if it is in use.
+    If an external WSGI server is used this raises a warning in the
+    WSGI server will log
+    """
     serverShutdownFunction = request.environ.get('werkzeug.server.shutdown')
     if serverShutdownFunction is None:
-        raise RuntimeError('Not running with the Local Server')
-    serverShutdownFunction()
+        app.logger.info('Local development server not active. Shutdown request ignored. '
+                        'You most likely need to kill the external WSGI process.')
+    else:
+        serverShutdownFunction()
 
 # Set local source
-
-
 @app.route('/setLocalSource/<inLocalSource>')
 def setLocalSource(inLocalSource):
     global localSource
@@ -520,23 +528,17 @@ def updateJournal(instrument, cycle):
         fields.append(runData)
     return jsonify(fields)
 
-# Close server
-
-
+# Close local server
 @app.route('/shutdown', methods=['GET'])
 def shutdown():
     shutdown_server()
     return jsonify({"response": "Server shut down"})
 
-def create_app():
-    """Return the flask app to an external WSGI server"""
-    return app
-
 def main():
     """Start the flask development server with default settings"""
+    app = create_app()
     app.run()
 
-
-# Start server when executed as a main routine
+# Start local development server when executed as a main routine
 if __name__ == '__main__':
     main()

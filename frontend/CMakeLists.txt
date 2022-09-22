@@ -103,15 +103,18 @@ set(jv2_RES_QRC "src/icons.qrc")
 
 qt6_add_executable(jv2 MACOSX_BUNDLE ${PROJECT_SOURCES} ${jv2_RES_QRC})
 target_include_directories(jv2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
-target_link_libraries(jv2
-  PRIVATE
-    Qt6::Core Qt6::Widgets  Qt6::Network Qt6::Charts Qt6::Xml Qt6::OpenGLWidgets
-    ${STATIC_PLATFORM_PLUGINS}
-)
+target_link_libraries(
+  jv2
+  PRIVATE Qt6::Core
+          Qt6::Widgets
+          Qt6::Network
+          Qt6::Charts
+          Qt6::Xml
+          Qt6::OpenGLWidgets
+          ${STATIC_PLATFORM_PLUGINS})
 
 set_target_properties(
   jv2
   PROPERTIES MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
              MACOSX_BUNDLE_SHORT_VERSION_STRING
-             ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-)
+             ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})

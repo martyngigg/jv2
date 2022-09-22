@@ -28,11 +28,13 @@ localSource = ""
 # Global Flask application instance
 app = None
 
+
 def create_app():
     """Create and return the flask app """
-    globals app
+    global app
     app = Flask(__name__)
     return app
+
 
 def shutdown_server():
     """Shutdown a local flask server if it is in use.
@@ -41,10 +43,13 @@ def shutdown_server():
     """
     serverShutdownFunction = request.environ.get('werkzeug.server.shutdown')
     if serverShutdownFunction is None:
-        app.logger.info('Local development server not active. Shutdown request ignored. '
-                        'You most likely need to kill the external WSGI process.')
+        app.logger.info('Local development server not active. '
+                        'Shutdown request ignored. '
+                        'You most likely need to kill the external '
+                        'WSGI process.')
     else:
         serverShutdownFunction()
+
 
 # Set local source
 @app.route('/setLocalSource/<inLocalSource>')
@@ -54,9 +59,8 @@ def setLocalSource(inLocalSource):
     print("local source: " + localSource)
     return jsonify("success")
 
+
 # clear local source
-
-
 @app.route('/clearLocalSource')
 def clearLocalSource():
     global localSource
@@ -104,7 +108,7 @@ def getCycles(instrument):
     url += instrument+'/journal_main.xml'
     try:
         response = urlopen(url)
-    except(Exception):
+    except Exception:
         return jsonify({"response": "ERR. url not found"})
     lastModified_ = response.info().get('Last-Modified')
     lastModified_ = datetime.strptime(
@@ -129,13 +133,13 @@ def getJournal(instrument, cycle):
         with open(localSource + 'ndx' + instrument+'/'+cycle, "r") as file:
             root = fromstring(file.read())
             print("data from file")
-    except(Exception):
+    except Exception:
         if localSource != "":
             return jsonify("invalid source")
         url = dataLocation + 'ndx' + instrument+'/'+cycle
         try:
             response = urlopen(url)
-        except(Exception):
+        except Exception:
             return jsonify({"response": "ERR. url not found"})
         tree = parse(response)
         root = tree.getroot()
@@ -149,7 +153,7 @@ def getJournal(instrument, cycle):
                 '{http://definition.nexusformat.org/schema/3.0}', '')
             try:
                 dataValue = data.text.strip()
-            except(Exception):
+            except Exception:
                 dataValue = data.text
             # If value is valid date
             try:
@@ -162,7 +166,7 @@ def getJournal(instrument, cycle):
                         time.strftime("%H:%M:%S")
                 else:
                     runData[dataId] = time.strftime("%d/%m/%Y %H:%M:%S")
-            except(Exception):
+            except Exception:
                 # If header is duration then format
                 if (dataId == "duration"):
                     dataValue = int(dataValue)
@@ -196,11 +200,11 @@ def getAllJournals(instrument, search):
             fileString = localSource + 'ndx' + instrument+'/'+str(cycle)
             with open(fileString, "r") as file:
                 root = ET.fromstring(file.read())
-        except(Exception):
+        except Exception:
             url = dataLocation + 'ndx' + instrument+'/'+str(cycle)
             try:
                 response = urlopen(url)
-            except(Exception):
+            except Exception:
                 return jsonify({"response": "ERR. url not found"})
             tree = ET.parse(response)
             root = tree.getroot()
@@ -223,7 +227,7 @@ def getAllJournals(instrument, search):
                     '{http://definition.nexusformat.org/schema/3.0}', '')
                 try:
                     dataValue = data.text.strip()
-                except(Exception):
+                except Exception:
                     dataValue = data.text
                 # If value is valid date
                 try:
@@ -237,7 +241,7 @@ def getAllJournals(instrument, search):
                             time.strftime("%H:%M:%S")
                     else:
                         runData[dataId] = time.strftime("%d/%m/%Y %H:%M:%S")
-                except(Exception):
+                except Exception:
                     # If header is duration then format
                     if (dataId == "duration"):
                         dataValue = int(dataValue)
@@ -276,11 +280,11 @@ def getAllFieldJournals(instrument, field, search, options):
             fileString = localSource + 'ndx' + instrument+'/'+str(cycle)
             with open(fileString, "r") as file:
                 root = ET.fromstring(file.read())
-        except(Exception):
+        except Exception:
             url = dataLocation + 'ndx' + instrument+'/'+str(cycle)
             try:
                 response = urlopen(url)
-            except(Exception):
+            except Exception:
                 return jsonify({"response": "ERR. url not found"})
             tree = ET.parse(response)
             root = tree.getroot()
@@ -316,7 +320,7 @@ def getAllFieldJournals(instrument, field, search, options):
                     '{http://definition.nexusformat.org/schema/3.0}', '')
                 try:
                     dataValue = data.text.strip()
-                except(Exception):
+                except Exception:
                     dataValue = data.text
                 # If value is valid date
                 try:
@@ -330,7 +334,7 @@ def getAllFieldJournals(instrument, field, search, options):
                             time.strftime("%H:%M:%S")
                     else:
                         runData[dataId] = time.strftime("%d/%m/%Y %H:%M:%S")
-                except(Exception):
+                except Exception:
                     # If header is duration then format
                     if (dataId == "duration"):
                         dataValue = int(dataValue)
@@ -366,18 +370,18 @@ def getGoToCycle(instrument, search):
             fileString = localSource + 'ndx' + instrument+'/'+str(cycle)
             with open(fileString, "r") as file:
                 root = ET.fromstring(file.read())
-        except(Exception):
+        except Exception:
             url = dataLocation + 'ndx' + instrument+'/'+str(cycle)
             try:
                 response = urlopen(url)
-            except(Exception):
+            except Exception:
                 return jsonify({"response": "ERR. url not found"})
             tree = ET.parse(response)
             root = tree.getroot()
 
         path = "//*[data:run_number="+search+"]"
         foundElems = root.xpath(path, namespaces=nameSpace)
-        if(len(foundElems) > 0):
+        if len(foundElems) > 0:
             endTime = datetime.now()
             print(endTime - startTime)
             return cycle
@@ -441,11 +445,11 @@ def getTotalMuAmps(instrument, cycle, runs):
     try:
         with open(localSource + 'ndx' + instrument+'/'+cycle, "r") as file:
             root = fromstring(file.read())
-    except(Exception):
+    except Exception:
         url = dataLocation + 'ndx' + instrument+'/'+cycle
         try:
             response = urlopen(url)
-        except(Exception):
+        except Exception:
             return jsonify({"response": "ERR. url not found"})
         tree = parse(response)
         root = tree.getroot()
@@ -486,7 +490,7 @@ def updateJournal(instrument, cycle):
     url += instrument+'/' + cycle
     try:
         response = urlopen(url)
-    except(Exception):
+    except Exception:
         return jsonify({"response": "ERR. url not found"})
     tree = parse(response)
     root = tree.getroot()
@@ -501,7 +505,7 @@ def updateJournal(instrument, cycle):
                 '{http://definition.nexusformat.org/schema/3.0}', '')
             try:
                 dataValue = data.text.strip()
-            except(Exception):
+            except Exception:
                 dataValue = data.text
             # If value is valid date
             try:
@@ -514,7 +518,7 @@ def updateJournal(instrument, cycle):
                         time.strftime("%H:%M:%S")
                 else:
                     runData[dataId] = time.strftime("%d/%m/%Y %H:%M:%S")
-            except(Exception):
+            except Exception:
                 # If header is duration then format
                 if (dataId == "duration"):
                     dataValue = int(dataValue)
@@ -528,16 +532,19 @@ def updateJournal(instrument, cycle):
         fields.append(runData)
     return jsonify(fields)
 
+
 # Close local server
 @app.route('/shutdown', methods=['GET'])
 def shutdown():
     shutdown_server()
     return jsonify({"response": "Server shut down"})
 
+
 def main():
     """Start the flask development server with default settings"""
     app = create_app()
     app.run()
+
 
 # Start local development server when executed as a main routine
 if __name__ == '__main__':

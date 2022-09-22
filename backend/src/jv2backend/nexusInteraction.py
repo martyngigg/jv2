@@ -54,7 +54,7 @@ def file(instrument, cycle, run):
         nxsFile = File(nxsDir)
         print("Successful file opening")
         return nxsFile
-    except(Exception):
+    except Exception:
         print("File error")
         return ["ERR. File failed to open"]
 
@@ -106,11 +106,11 @@ def runData(file, fields, run):
             try:
                 value = dataBlock['value_log']['value']
                 time = dataBlock['value_log']['time']
-            except(Exception):
+            except Exception:
                 try:
                     value = dataBlock['value']
                     time = dataBlock['time']
-                except(Exception):
+                except Exception:
                     return ["response:", "ERR. Data not found"]
 
         blockShape = value.shape
@@ -118,7 +118,7 @@ def runData(file, fields, run):
         for i in range(0, blockShape[0]):
             try:
                 blockData.append([float(time[i]), float(value[i])])
-            except(Exception):
+            except Exception:
                 blockData.append([float(time[i]), value[i][0].decode('UTF-8')])
         runData.append(blockData)
     return runData

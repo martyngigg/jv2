@@ -42,16 +42,16 @@ steps:
       export Qt6Svg_DIR=${QT_INSTALL_DIR}/$QTVER/lib/cmake/Qt6Svg
       Qt6_ROOT=${QT_INSTALL_DIR}/${QTVER}
       PATH="${Qt6_DIR}:${PATH}"
+
       # Building
-      mkdir build
-      cd build
-      
+      mkdir frontend/build
+      cd frontend/build
+
       cmake ../ -DLOCAL_STATIC_HDF5:bool=True -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}
       make
       cmake ../ -G Ninja -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_Fortran_COMPILER:string="gfortran-9" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}
       ninja
 
-      cd ../
-      pyinstaller backend/isisInternal.py
-      pyinstaller backend/jv2Setup.py
+      cd ../../backend
+      python -m pip wheel --wheel-dir=wheels .
     displayName: 'Build'

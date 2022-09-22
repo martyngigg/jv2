@@ -1,107 +1,16 @@
-parameters:
-  - name: package
-    default : "jv2"
-  - name: export
-    default : true
-  - name: exportExe
-    default : true
-  - name: exportSingularity
-    default : true
-  - name: docker
-    default: "docker-gui"
-  - name: singularity
-    default: "singularity-gui"
-  - name: nix_version
-    default: 2.4
-
 steps:
   - bash: |
       set -ex
-      # -- General
-      sudo apt-get update -q
-      sudo apt-get install ninja-build python3-setuptools uuid uuid-dev
-      sudo apt-get install libgl1-mesa-dev
-      sudo apt-get install mesa-utils-extra
-      sudo apt-get install freeglut3-dev
-      # -- Python
-      pip3 install wheel
-      pip3 install pyinstaller
-      pip3 install flask
-      pip3 install h5py
-      pip3 install lxml
+      sudo scripts/linux/setup-for-development-ubuntu.sh
     displayName: 'Install Prerequisites'
   - bash: |
       set -ex
-      # -- General
-      sudo apt-get install curl gpg
-      curl -o install-nix${{ parameters.nix_version }} https://releases.nixos.org/nix/nix-${{ parameters.nix_version }}/install
-      curl -o install-nix${{ parameters.nix_version }}.asc https://releases.nixos.org/nix/nix-${{ parameters.nix_version }}/install.asc
-      gpg2 --keyserver hkps://keyserver.ubuntu.com --recv-keys B541D55301270E0BCF15CA5D8170B4726D7198DE
-      gpg2 --verify ./install-nix${{ parameters.nix_version }}.asc
-      sh ./install-nix${{ parameters.nix_version }}
-      mkdir -p ~/.config/nix/
-      echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-      echo "system-features = kvm" >> ~/.config/nix/nix.conf
-    displayName: 'Install nix'
+      cd frontend
+      mkdir build && cd build
+      cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DJV2_USE_CONAN=ON ../
+      cmake --build .
+    displayName: 'Build Frontend'
   - bash: |
       set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      sudo rm -rf /usr/local*
-      sudo rm -rf /usr/share*
-      sudo rm -rf /usr/src*
-    displayName: 'Remove redundant ubuntu data'
-    condition: eq( '${{ parameters.export }}', 'true' )
-  - bash: |
-      set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      nix-channel --add https://nixos.org/channels/nixos-21.11 nixos
-      nix-channel --update
-      mkdir -p .config/cachix
-      nix-env -iA cachix -f https://cachix.org/api/v1/install
-      nix-env -iA nixos.jq
-      cachix use jv2-nix
-    displayName: 'Install Cachix'
-  - bash: |
-      set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      nix build -L .#${{ parameters.package }}
-      nix build --json .#${{ parameters.package }} > archive.json
-      pyinstaller backend/isisInternal.py
-      pyinstaller backend/jv2Setup.py
-      mv dist/isisInternal dist/jv2Setup
-    displayName: 'Build'
-  - bash: |
-      set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      cat archive.json | jq -r '.[].outputs | to_entries[].value' | cachix push jv2-nix
-      nix-collect-garbage -d
-    displayName: 'Push to Cachix'
-    env:
-      CACHIX_AUTH_TOKEN: eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzNGQ1Y2U2ZS1iNWJiLTQ1YzctYjBmMi04N2VmZWY5Zjk5OTQiLCJzY29wZXMiOiJjYWNoZSJ9.snjSwK5gdyPMaE4uwKZxwji4qxBv3T2EdEVnE6li0TU
-    condition: eq('${{ parameters.export }}', 'true')
-  - bash: |
-      set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      cachix use jv2-nix
-      mkdir -p packages
-      nix bundle -L .#${{ parameters.package }}
-      # Get program version and move/rename artifact
-      VERSION=`grep "#define JV2VERSION" version.h | sed "s/.*\"\(.*\)\"/\1/g"`
-      
-      mkdir -p packages/jv2
-      cp ${{ parameters.package }} packages/jv2/${{ parameters.package }}
-      rm ${{ parameters.package }}
-      mv dist/jv2Setup packages/jv2Setup
-    displayName: 'Package Executable'
-    condition: eq(1,1)
-  - bash: |
-      set -ex
-      source ~/.nix-profile/etc/profile.d/nix.sh
-      cachix use jv2-nix
-      nix build -L .#${{ parameters.singularity }}
-      # Get program version and move/rename artifact
-      VERSION=`grep "#define JV2VERSION" version.h | sed "s/.*\"\(.*\)\"/\1/g"`
-      mkdir -p packages
-      cp result packages/${{ parameters.package }}-${VERSION}.sif
-    displayName: 'Package Singularity'
-    condition: eq(1,0)
+      cd backend
+      python3 -m pip wheel --wheel-dir=wheels .

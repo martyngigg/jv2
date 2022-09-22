@@ -30,11 +30,11 @@ stages:
               PathtoPublish: "packages/"
               ArtifactName: 'windows-artifacts'
             displayName: 'Publish Windows Artifacts'
-    
+
       - job: 'linux'
         displayName: 'Linux'
         pool:
-          vmImage: 'ubuntu-18.04'
+          vmImage: 'ubuntu-22.04'
         steps:
           - checkout: self
             fetchDepth: 1
@@ -44,7 +44,7 @@ stages:
               PathtoPublish: "packages/"
               ArtifactName: 'linux-artifacts'
             displayName: 'Publish Linux Artifacts'
-    
+
       - job: 'osx'
         displayName: 'OSX'
         condition: eq(1,0)

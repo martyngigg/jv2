@@ -35,14 +35,14 @@ steps:
       HDF5_DIR="$(pwd)/${{ parameters.hdf5tag }}"
       Qt6_DIR="/d/a/1/b/Qt/6.1.2/msvc2019_64"
       PATH="${Qt6_DIR}:${PATH}"
-      mkdir build
-      cd build
+      mkdir frontend/build
+      cd frontend/build
       cmake ../ -G "Visual Studio 16 2019" -A "x64" -DLOCAL_STATIC_HDF5:bool=True -DHDF5_DIR:path=${HDF5_DIR} ${{ parameters.extraflags }} -DCMAKE_PREFIX_PATH:path=${Qt6_DIR}/lib/cmake
       cmake --build . --config Release
       cmake --install .
 
-      cd ../
-      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console backend/isisInternal.py
-      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console backend/jv2Setup.py
+      cd ../../backend/src
+      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console \
+          --module jv2backend --include-package=jv2backend
       ls -R
     displayName: 'Build'

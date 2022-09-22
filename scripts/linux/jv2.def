@@ -13,7 +13,7 @@ Stage: final
 
 %files
     # wrapper script
-    ./jv2gui /usr/local/bin/jv2gui
+    ./jv2launcher /usr/local/bin/jv2launcher
 
 %environment
     export FONTCONFIG_PATH=/etc/fonts
@@ -61,15 +61,8 @@ Stage: final
       rm -fr /var/wheels
     python3 -m pip install gunicorn
 
-    # Runtime variables
-    # Configure Python to search in /opt - just switch out the /usr prefix with /opt/jv2
-    # opt_python_purelib=$(python3 -c "import sysconfig;print(sysconfig.get_path('platlib').replace('/usr', '/opt/jv2'))")
-    # echo "export PYTHONPATH=\"${opt_python_purelib}\"" >> $SINGULARITY_ENVIRONMENT
-    # # Add opt to PATH
-    # echo "export PATH=\"${JV2_INSTALL_PREFIX}/bin:${PATH}\"" >> $SINGULARITY_ENVIRONMENT
-
 %runscript
     # Disable session management as it causes a Qt warning:
     #   Qt: Session management error: None of the authentication protocols specified are supported
     unset SESSION_MANAGER
-    jv2gui
+    jv2launcher

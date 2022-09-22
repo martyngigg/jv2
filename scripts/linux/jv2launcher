@@ -6,9 +6,8 @@
 # constants
 LISTEN_ADDR=127.0.0.1:5000
 
-# global variable
+# global variables
 BACKEND_PID=
-
 
 # -------------------- functions ---------------
 
@@ -34,5 +33,5 @@ BACKEND_PID=$!
 echo "Started backend on process ${BACKEND_PID}"
 
 # start gui and wait (brief pause to allow server to start)
-sleep 1
+sleep 2
 jv2

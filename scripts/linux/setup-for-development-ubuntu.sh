@@ -36,6 +36,7 @@ run_elevated apt -y install --no-install-recommends \
   pkg-config \
   python3-setuptools \
   python3-pip \
+  python3-venv \
   python3-wheel \
   xz-utils
 

@@ -15,7 +15,7 @@ stages:
   - template: templates/codeQualityChecks.yml
 
   - stage: 'build'
-    displayName: 'Build and Package'
+    displayName: 'Build'
     jobs:
       - job: 'windows'
         displayName: 'Windows'
@@ -25,12 +25,6 @@ stages:
           - checkout: self
             fetchDepth: 1
           - template: templates/windowsBuild.yml
-          - template: templates/windowsPackage.yml
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: "packages/"
-              ArtifactName: 'windows-artifacts'
-            displayName: 'Publish Windows Artifacts'
 
       - job: 'linux'
         displayName: 'Linux'

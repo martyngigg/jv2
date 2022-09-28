@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Launch script to wrap starting the backend & frontend.
-# Ensures the server shutsdown when the GUI exits
+# Ensures the server shuts down when the GUI exits
 # The backend is spun up using waitress
 
 # constants

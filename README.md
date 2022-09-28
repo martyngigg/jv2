@@ -67,5 +67,5 @@ cd backend
 python3 -m venv ./venv
 # activate
 source ./venv/bin/activate
-python -m pip install --editable .
+python3 -m pip install --editable .
 ```

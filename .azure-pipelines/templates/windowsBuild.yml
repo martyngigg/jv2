@@ -41,8 +41,6 @@ steps:
       cmake --build . --config Release
       cmake --install .
 
-      cd ../../backend/src
-      yes | python3 -m nuitka --standalone --plugin-enable=numpy --msvc=14.2 --windows-disable-console \
-          --module jv2backend --include-package=jv2backend
-      ls -R
+      cd ../../backend
+      python3 -m pip wheel --wheel-dir=wheels .
     displayName: 'Build'

@@ -1,13 +1,4 @@
-variables:
-  BUILD_CFG: 'Release'
-  CONAN_USER_HOME: '$(Build.SourcesDirectory)/conan'
-
 steps:
-  - task: Cache@2
-    displayName: "Cache conan packages"
-    inputs:
-      key: 'conan | "$(Agent.OS)" | $(Build.SourcesDirectory)/frontend/cmake/Modules/conan-jv2.cmake'
-      path: "$(CONAN_HOME)"
   - bash: |
       set -ex
       sudo scripts/linux/setup-for-development-ubuntu.sh
